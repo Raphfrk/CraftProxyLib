@@ -251,7 +251,7 @@ public abstract class Field {
 	 * 
 	 * @param packet the Packet
 	 * @param the field index
-	 * @return the value of the 
+	 * @return the value of the field
 	 */
 	public static Object read(Packet packet, int i) throws IOException {
 		int id = packet.getId();
@@ -273,6 +273,32 @@ public abstract class Field {
 		} finally {
 			packet.reset();
 		}
+	}
+	
+	/**
+	 * Reads the packet fields from a Packet.
+	 * 
+	 * @param packet the Packet
+	 * @return an array containing the values of the fields
+	 */
+	public static Object[] readAll(Packet packet) throws IOException {
+		int id = packet.getId();
+		if (id < 0) {
+			return null;
+		}
+		
+		packet.reset();
+		packet.setInputStream(null);
+		
+		Field[] fields = expandedFieldMap[id];
+		
+		Object[] values = new Object[fields.length];
+		
+		for (int i = 0; i < fields.length; i++) {
+			values[i] = fields[i].read(packet);
+		}
+		
+		return values;
 	}
 	
 	/**

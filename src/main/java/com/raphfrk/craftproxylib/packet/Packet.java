@@ -252,4 +252,25 @@ public class Packet extends InputStream {
 			}
 		}
 	}
+	
+	/**
+	 * Reads a Field from the Packet
+	 * 
+	 * @param i the field index
+	 * @return the value of the field
+	 * @throws IOException
+	 */
+	public Object readField(int i) throws IOException {
+		return Field.read(this, i);
+	}
+	
+	/**
+	 * Reads all the Fields from the Packet
+	 * 
+	 * @return an array containing the values of the field
+	 * @throws IOException
+	 */
+	public Object readFields() throws IOException {
+		return Field.readAll(this);
+	}
 }
