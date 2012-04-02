@@ -1,5 +1,0 @@
-This is a library for handling the Minecraft protocol.  It is released under the MIT license, see the LICENSE file.
-
-This software uses Maven for building.  This should handle all dependencies, you can install it to your local repository by entering the following command.
-
-    mvn clean install
