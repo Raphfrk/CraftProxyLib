@@ -1,5 +1,7 @@
 package com.raphfrk.craftproxylib.login;
 
+import com.raphfrk.craftproxylib.MCSocket;
+
 public class LoginInfo {
 	
 	private final String username;
@@ -13,6 +15,8 @@ public class LoginInfo {
 	private final byte difficulty;
 	private final String hash;
 	private final int dimension;
+	private final MCSocket server;
+	private final MCSocket client;
 	
 	private final String error;
 	
@@ -29,10 +33,12 @@ public class LoginInfo {
 		this.maxPlayers = 0;
 		this.hash = null;
 		this.dimension = 0;
+		this.server = null;
+		this.client = null;
 	}
 	
 	public LoginInfo(String username, String hostname, int port) {
-		this(username, hostname, port, null, 0, 0, 0, null, (byte)0, (byte)0, (byte)0, 0);
+		this(username, hostname, port, null, 0, 0, 0, null, (byte)0, (byte)0, (byte)0, 0, null, null);
 	}
 	
 	public LoginInfo(LoginInfo info, int protocolVersion) {
@@ -48,7 +54,9 @@ public class LoginInfo {
 				info.getDifficulty(),
 				info.getUnused(),
 				info.getMaxPlayers(),
-				info.getDimension());
+				info.getDimension(),
+				info.getServerSocket(),
+				info.getClientSocket());
 	}
 	
 	public LoginInfo(LoginInfo info, String hash) {
@@ -64,7 +72,9 @@ public class LoginInfo {
 				info.getDifficulty(),
 				info.getUnused(),
 				info.getMaxPlayers(),
-				info.getDimension());
+				info.getDimension(),
+				info.getServerSocket(),
+				info.getClientSocket());
 	}
 	
 	public LoginInfo(LoginInfo info, int entityId, String levelType, int serverMode, int dimension, byte difficulty, byte unused, byte maxPlayers) {
@@ -80,10 +90,30 @@ public class LoginInfo {
 				difficulty,
 				unused,
 				maxPlayers,
-				dimension);
+				dimension,
+				info.getServerSocket(),
+				info.getClientSocket());
 	}
 	
-	public LoginInfo(String username, String hostname, int port, String levelType, int serverMode, int entityId, int protocolVersion, String hash, byte difficulty, byte unused, byte maxPlayers, int dimension) {
+	public LoginInfo(LoginInfo info, MCSocket server, MCSocket client) {
+		this(
+				info.getUsername(),
+				info.getHostname(),
+				info.getPort(),
+				info.getLevelType(),
+				info.getServerMode(),
+				info.getEntityId(),
+				info.getProtocolVersion(),
+				info.getHash(),
+				info.getDifficulty(),
+				info.getUnused(),
+				info.getMaxPlayers(),
+				info.getDimension(),
+				server,
+				client);
+	}
+	
+	public LoginInfo(String username, String hostname, int port, String levelType, int serverMode, int entityId, int protocolVersion, String hash, byte difficulty, byte unused, byte maxPlayers, int dimension, MCSocket server, MCSocket client) {
 		this.username = username;
 		this.hostname = hostname;
 		this.port = port;
@@ -96,6 +126,8 @@ public class LoginInfo {
 		this.maxPlayers = maxPlayers;
 		this.hash = hash;
 		this.dimension = dimension;
+		this.server = server;
+		this.client = client;
 	}
 
 	
@@ -149,6 +181,14 @@ public class LoginInfo {
 	
 	public int getDimension() {
 		return dimension;
+	}
+	
+	public MCSocket getServerSocket() {
+		return server;
+	}
+	
+	public MCSocket getClientSocket() {
+		return client;
 	}
 
 	public String toString() {

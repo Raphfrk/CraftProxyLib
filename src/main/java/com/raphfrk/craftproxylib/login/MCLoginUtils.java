@@ -2,18 +2,100 @@ package com.raphfrk.craftproxylib.login;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.security.SecureRandom;
+import java.util.Map;
 
 import com.raphfrk.craftproxylib.MCSocket;
 import com.raphfrk.craftproxylib.packet.Packet;
 import com.raphfrk.craftproxylib.packet.standard.HandshakePacket;
 import com.raphfrk.craftproxylib.packet.standard.LoginPacket;
 import com.raphfrk.craftproxylib.util.ConcurrentTimedOutHashMap;
+import com.raphfrk.craftproxylib.util.NetworkUtils;
 
 public class MCLoginUtils {
 	
 	private static final ConcurrentTimedOutHashMap<InetAddress, Long> floodShield = new ConcurrentTimedOutHashMap<InetAddress, Long>(60000);
 	
+	/**
+	 * Handles a client login.  If there is a connect map match, the proxy will connect to that server.<br>
+	 * <br>
+	 * The order of matching for the map is as follows:<br>
+	 *  "playername;hostname:port"
+	 *  "hostname:port"
+	 *  "playername"
+	 *  
+	 * @param client the client Socket
+	 * @param playerConnectMap a map which maps to server addresses
+	 * @param defaultServer the default server to connect to
+	 * @param rotateIP activates ip address rotation when connecting to local network IPs
+	 * @return
+	 * @throws IOException
+	 */
+	public static LoginInfo handleLogin(Socket client, Map<String, InetSocketAddress> connectMap, InetSocketAddress defaultServer, boolean rotateIP) throws IOException {
+		
+		MCSocket mClient = new MCSocket(client, false);
+		
+		LoginInfo info = MCLoginUtils.acceptClientHandshake(mClient, null);
+		
+		if (info.getError() != null) {
+			return info;
+		}
+		
+		InetSocketAddress serverAddr;
+		
+		if (connectMap != null) {
+			serverAddr = connectMap.get(info.getUsername() + ";" + info.getHostname() + ":" + info.getPort());
+			if (serverAddr == null) {
+				serverAddr = connectMap.get(info.getHostname() + ":" + info.getPort());
+				if (serverAddr == null) {
+					serverAddr = connectMap.get(info.getHostname() + ":" + info.getPort());
+					if (serverAddr == null) {
+						serverAddr = defaultServer;
+					}
+				}
+			}
+		} else {
+			serverAddr = defaultServer;
+		}
+		
+		Socket server;
+		
+		InetAddress serverIP = serverAddr.getAddress();
+		int serverPort = serverAddr.getPort();
+		
+		if (rotateIP || NetworkUtils.isLocal(serverAddr.getAddress())) {
+			InetAddress connectFromAddress = NetworkUtils.getNextLocalIP();
+			server = new Socket(serverIP, serverPort, connectFromAddress, 0);
+		} else {
+			server = new Socket(serverIP, serverPort);
+		}
+		
+		MCSocket mServer = new MCSocket(server, true);
+		
+		MCLoginUtils.sendClientHandshake(mServer, info);
+		
+		info = new LoginInfo(info, mServer, mClient);
+		
+		info = MCLoginUtils.acceptServerHandshake(mServer, mClient, info);
+		
+		if (info.getError() != null) {
+			return info;
+		}
+		
+		info = MCLoginUtils.acceptClientLogin(mClient, mServer, info);
+		
+		if (info.getError() != null) {
+			return info;
+		}
+		
+		info = MCLoginUtils.acceptServerLogin(mServer, mClient, info);
+		
+		return info;
+		
+	}
+
 	/**
 	 * Reads a client login handshake from a socket
 	 * 
