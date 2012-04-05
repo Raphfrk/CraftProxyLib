@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.raphfrk.craftproxylib.fields.Field;
+import com.raphfrk.craftproxylib.fields.elements.FieldEntityId;
 
 /**
  * A packet associated with the protocol
@@ -146,6 +147,10 @@ public class Packet extends InputStream {
 		}
 	}
 	
+	public void reset(int pos) {
+		this.pos = pos;
+	}
+	
 	@Override
 	public void reset() {
 		pos = 0;
@@ -272,5 +277,22 @@ public class Packet extends InputStream {
 	 */
 	public Object readFields() throws IOException {
 		return Field.readAll(this);
+	}
+	
+	/**
+	 * Performs entityId mapping for a given packet
+	 */
+	public void swapEntityId(byte[] id1, byte[] id2) {
+		int id = getId();
+		if (id < 0) {
+			return;
+		} else {
+			int[] positions = Field.getEntityIdInfo(id);
+			if (positions != null) {
+				for (int i : positions) {
+					FieldEntityId.swapEntityId(buf, i, id1, id2);
+				}
+			}
+		}
 	}
 }

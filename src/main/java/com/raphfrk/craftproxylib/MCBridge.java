@@ -124,7 +124,6 @@ public class MCBridge {
 		}
 		
 		public void interrupt() {
-			readError = true;
 			running = false;
 			super.interrupt();
 		}
@@ -163,7 +162,9 @@ public class MCBridge {
 							throw new RuntimeException("Handler " + handler.getClass().getSimpleName() + " threw an exception", e);
 						}
 					}
-					if (p != null) {
+					if (p == PacketHandler.INTERRUPT) {
+						running = false;
+					} else if (p != null) {
 						try {
 							to.writePacket(p);
 						} catch (IOException ioe) {
@@ -191,9 +192,9 @@ public class MCBridge {
 					}
 				} else {
 					counterFlowThread.interrupt();
-					boolean counterFlowThreadClosed = !closeSync.compareAndSet(false, true);
+					boolean counterFlowThreadDead = !closeSync.compareAndSet(false, true);
 
-					if (counterFlowThreadClosed) {
+					if (counterFlowThreadDead) {
 						try {
 							counterFlowThread.join();
 						} catch (InterruptedException e) {

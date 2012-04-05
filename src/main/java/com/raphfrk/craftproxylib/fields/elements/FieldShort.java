@@ -14,7 +14,7 @@ public class FieldShort extends FieldFixedLength {
 	public static short readShort(InputStream in, byte[] buffer) throws IOException {
 		fillBuffer(buffer, in);
 		
-		return (short)((buffer[0] << 8) | buffer[1]);
+		return (short)((buffer[0] << 8) | (buffer[1] & 0xFF));
 	}
 
 	@Override

@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.raphfrk.craftproxylib.fields.Field;
+import com.raphfrk.craftproxylib.fields.elements.FieldInteger;
 import com.raphfrk.craftproxylib.packet.Packet;
 import com.raphfrk.craftproxylib.util.ArrayFIFO;
 
@@ -26,6 +29,10 @@ public class MCInputStream extends FilterInputStream {
 	private final int packetSize;
 	
 	private final ArrayFIFO packetIds = new ArrayFIFO(50);
+	
+	private final AtomicReference<byte[]> clientEntityId = new AtomicReference<byte[]>(null);
+	private final AtomicReference<byte[]> serverEntityId = new AtomicReference<byte[]>(null);
+	private final AtomicBoolean entityIdMapping = new AtomicBoolean();
 	
 	protected MCInputStream(InputStream in) {
 		this(in, 500);
@@ -81,13 +88,17 @@ public class MCInputStream extends FilterInputStream {
 		Field[] fields = Field.getCompressedFields(id);
 		
 		if (fields == null) {
-			byte[] oldIds = packetIds.read();
+			int[] oldIds = packetIds.read();
 			System.out.println("Packet ids: " + Arrays.toString(oldIds));
 			throw new IOException("Unknown packet id 0x" + Integer.toHexString(id));
 		}
 		
 		for (int f = 0; f < fields.length; f++) {
 			fields[f].skip(packet);
+		}
+		
+		if (id >= 0 && this.entityIdMapping.get()) {
+			packet.swapEntityId(clientEntityId.get(), serverEntityId.get());
 		}
 		
 		Packet r = packet;
@@ -97,6 +108,18 @@ public class MCInputStream extends FilterInputStream {
 		packet = null;
 		
 		return r;
+	}
+	
+	public void setServerEntityId(int entityId) {
+		byte[] newEntityId = new byte[4];
+		FieldInteger.writeInt(newEntityId, 0, entityId);
+		this.serverEntityId.set(newEntityId);
+	}
+	
+	public void setClientEntityId(int entityId) {
+		byte[] newEntityId = new byte[4];
+		FieldInteger.writeInt(newEntityId, 0, entityId);
+		this.clientEntityId.set(newEntityId);
 	}
 
 }

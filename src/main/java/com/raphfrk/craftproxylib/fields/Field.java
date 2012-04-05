@@ -9,6 +9,7 @@ import com.raphfrk.craftproxylib.fields.elements.FieldBoolean;
 import com.raphfrk.craftproxylib.fields.elements.FieldByte;
 import com.raphfrk.craftproxylib.fields.elements.FieldByteSizedByteArray;
 import com.raphfrk.craftproxylib.fields.elements.FieldDouble;
+import com.raphfrk.craftproxylib.fields.elements.FieldEntityId;
 import com.raphfrk.craftproxylib.fields.elements.FieldFloat;
 import com.raphfrk.craftproxylib.fields.elements.FieldIntSizedByteArray;
 import com.raphfrk.craftproxylib.fields.elements.FieldIntSizedByteArrayWithInt;
@@ -40,6 +41,11 @@ public abstract class Field {
 	private static final Field[][] compressedFieldMap = new Field[256][];
 	
 	/**
+	 * EntityId information about a packet
+	 */
+	private static final int[][] entityIdInfo = new int[256][];
+	
+	/**
 	 * Field array for use with ArrayList<Field>.toArray(Field[] fieldArray)
 	 */
 	private static final Field[] forToArray = new Field[0];
@@ -55,6 +61,8 @@ public abstract class Field {
 	private final static FieldDouble fDouble = new FieldDouble();
 	
 	private final static FieldString fString = new FieldString();
+	
+	private final static FieldEntityId fEId = new FieldEntityId();
 
 	private final static FieldIntSizedByteArrayWithInt fIntSizedByteArrayWithInt = new FieldIntSizedByteArrayWithInt();
 	private final static FieldIntSizedByteArray fIntSizedByteArray = new FieldIntSizedByteArray();
@@ -76,6 +84,15 @@ public abstract class Field {
 		compressFieldMap();
 	}
 	
+	public static void addSpoutPacket195() {
+		setPacketFields(0xC3, new Field[] {fInt, fIntSizedByteArray});
+	}
+	
+	public static void setPacketFields(int i, Field[] fields) {
+		expandedFieldMap[i] = fields;
+		compressFieldMap();
+	}
+	
 	private static void setupExpandedFieldMap() {
 		
 		Field[][] map = expandedFieldMap;
@@ -86,10 +103,10 @@ public abstract class Field {
 		map[0x02] = new Field[] {fString};
 		map[0x03] = new Field[] {fString};
 		map[0x04] = new Field[] {fLong};
-		map[0x05] = new Field[] {fInt, fShort, fShort, fShort};
+		map[0x05] = new Field[] {fEId, fShort, fShort, fShort};
 		map[0x06] = new Field[] {fInt, fShort, fShort, fShort};
 		map[0x06] = new Field[] {fInt, fInt, fInt};
-		map[0x07] = new Field[] {fInt, fInt, fBoolean};
+		map[0x07] = new Field[] {fEId, fEId, fBoolean};
 		map[0x08] = new Field[] {fShort, fShort, fFloat};
 		map[0x09] = new Field[] {fInt, fByte, fByte, fShort, fString};
 		map[0x0A] = new Field[] {fBoolean};
@@ -99,29 +116,29 @@ public abstract class Field {
 		map[0x0E] = new Field[] {fByte, fInt, fByte, fInt, fByte};
 		map[0x0F] = new Field[] {fInt, fByte, fInt, fByte, fItem};
 		map[0x10] = new Field[] {fShort};
-		map[0x11] = new Field[] {fInt, fByte, fInt, fByte, fInt};
-		map[0x12] = new Field[] {fInt, fByte};
-		map[0x13] = new Field[] {fInt, fByte};
-		map[0x14] = new Field[] {fInt, fString, fInt, fInt, fInt, fByte, fByte, fShort};
-		map[0x15] = new Field[] {fInt, fShort, fByte, fShort, fInt, fInt, fInt, fByte, fByte, fByte};
-		map[0x16] = new Field[] {fInt, fInt};
-		map[0x17] = new Field[] {fInt, fByte, fInt, fInt, fInt, fVelocity};
-		map[0x18] = new Field[] {fInt, fByte, fInt, fInt, fInt, fByte, fByte, fByte, fMetadata};
-		map[0x19] = new Field[] {fInt, fString, fInt, fInt, fInt, fInt};
-		map[0x1A] = new Field[] {fInt, fInt, fInt, fInt, fShort};
-		map[0x1C] = new Field[] {fInt, fShort, fShort, fShort};
-		map[0x1D] = new Field[] {fInt};
-		map[0x1E] = new Field[] {fInt};
-		map[0x1F] = new Field[] {fInt, fByte, fByte, fByte};
-		map[0x20] = new Field[] {fInt, fByte, fByte};
-		map[0x21] = new Field[] {fInt, fByte, fByte, fByte, fByte, fByte};
-		map[0x22] = new Field[] {fInt, fInt, fInt, fInt, fByte, fByte};
-		map[0x23] = new Field[] {fInt, fByte};
-		map[0x26] = new Field[] {fInt, fByte};
-		map[0x27] = new Field[] {fInt, fInt};
-		map[0x28] = new Field[] {fInt, fMetadata};
-		map[0x29] = new Field[] {fInt, fByte, fByte, fShort};
-		map[0x2A] = new Field[] {fInt, fByte};
+		map[0x11] = new Field[] {fEId, fByte, fInt, fByte, fInt};
+		map[0x12] = new Field[] {fEId, fByte};
+		map[0x13] = new Field[] {fEId, fByte};
+		map[0x14] = new Field[] {fEId, fString, fInt, fInt, fInt, fByte, fByte, fShort};
+		map[0x15] = new Field[] {fEId, fShort, fByte, fShort, fInt, fInt, fInt, fByte, fByte, fByte};
+		map[0x16] = new Field[] {fEId, fEId};
+		map[0x17] = new Field[] {fEId, fByte, fInt, fInt, fInt, fVelocity};
+		map[0x18] = new Field[] {fEId, fByte, fInt, fInt, fInt, fByte, fByte, fByte, fMetadata};
+		map[0x19] = new Field[] {fEId, fString, fInt, fInt, fInt, fInt};
+		map[0x1A] = new Field[] {fEId, fInt, fInt, fInt, fShort};
+		map[0x1C] = new Field[] {fEId, fShort, fShort, fShort};
+		map[0x1D] = new Field[] {fEId};
+		map[0x1E] = new Field[] {fEId};
+		map[0x1F] = new Field[] {fEId, fByte, fByte, fByte};
+		map[0x20] = new Field[] {fEId, fByte, fByte};
+		map[0x21] = new Field[] {fEId, fByte, fByte, fByte, fByte, fByte};
+		map[0x22] = new Field[] {fEId, fInt, fInt, fInt, fByte, fByte};
+		map[0x23] = new Field[] {fEId, fByte};
+		map[0x26] = new Field[] {fEId, fByte};
+		map[0x27] = new Field[] {fEId, fEId};
+		map[0x28] = new Field[] {fEId, fMetadata};
+		map[0x29] = new Field[] {fEId, fByte, fByte, fShort};
+		map[0x2A] = new Field[] {fEId, fByte};
 		map[0x2B] = new Field[] {fFloat, fShort, fShort};
 		map[0x32] = new Field[] {fInt, fInt, fBoolean};
 		map[0x33] = new Field[] {fInt, fInt, fBoolean, fShort, fShort, fIntSizedByteArrayWithInt};
@@ -131,7 +148,7 @@ public abstract class Field {
 		map[0x3C] = new Field[] {fDouble, fDouble, fDouble, fFloat, fIntSizedTripleByteArray};
 		map[0x3D] = new Field[] {fInt, fInt, fByte, fInt, fInt};
 		map[0x46] = new Field[] {fByte, fByte};
-		map[0x47] = new Field[] {fInt, fBoolean, fInt, fInt, fInt};
+		map[0x47] = new Field[] {fEId, fBoolean, fInt, fInt, fInt};
 		map[0x64] = new Field[] {fByte, fByte, fString, fByte};
 		map[0x65] = new Field[] {fByte};
 		map[0x66] = new Field[] {fByte, fShort, fByte, fShort, fBoolean, fItem};
@@ -157,14 +174,21 @@ public abstract class Field {
 	 * Compresses the expanded field map
 	 */
 	private static void compressFieldMap() {
-		
 		for (int i = 0; i < 256; i++) {
 			Field[] expFields = expandedFieldMap[i];
+			int pos = 1;
 			if (expFields != null) {
 				ArrayList<Field> compFields = new ArrayList<Field>();
 				int len = -1;
 				for (int f = 0; f < expFields.length; f++) {
 					Field field = expFields[f];
+					if (field instanceof FieldEntityId) {
+						if (pos != -1) {
+							entityIdInfo[i] = arrayAppend(entityIdInfo[i], pos);
+						} else {
+							System.out.println("Warning: Unable to generate entity id static map");
+						}
+					}
 					int fieldLength = field.getFixedLength();
 					if (fieldLength != -1) {
 						if (len == -1) {
@@ -172,7 +196,11 @@ public abstract class Field {
 						} else {
 							len += fieldLength;
 						}
+						if (pos != -1) {
+							pos += fieldLength;
+						}
 					} else {
+						pos = -1;
 						if (len != -1) {
 							compFields.add(new FieldFixedLength(len));
 							len = -1;
@@ -186,11 +214,18 @@ public abstract class Field {
 				}
 				compressedFieldMap[i] = compFields.toArray(forToArray);
 			}
-		}		
+		}	
+		for (int i = 0; i < 256; i++) {
+			
+		}
 	}
 	
 	public static Field[] getCompressedFields(int id) {
 		return compressedFieldMap[id];
+	}
+	
+	public static int[] getEntityIdInfo(int i) {
+		return entityIdInfo[i];
 	}
 	
 	protected final byte[] buffer;
@@ -259,10 +294,10 @@ public abstract class Field {
 			return null;
 		}
 		
-		packet.reset();
+		packet.reset(1);
 		packet.setInputStream(null);
 		
-		Field[] fields = expandedFieldMap[i];
+		Field[] fields = expandedFieldMap[id];
 		
 		for (int j = 0; j < i; j++) {
 			fields[j].skip(packet);
@@ -334,6 +369,19 @@ public abstract class Field {
 			} else {
 				i += b;
 			}
+		}
+	}
+	
+	private static int[] arrayAppend(int[] oldArray, int b) {
+		if (oldArray == null) {
+			return new int[] {b};
+		} else {
+			int[] newArray = new int[oldArray.length + 1];
+			for (int i = 0; i < oldArray.length; i++) {
+				newArray[i] = oldArray[i];
+			}
+			newArray[oldArray.length] = b;
+			return newArray;
 		}
 	}
 	

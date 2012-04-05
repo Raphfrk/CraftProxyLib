@@ -5,7 +5,7 @@ public class ArrayFIFO {
 	
 	private int write = 0;
 	private final int mask;
-	private byte[] buf;
+	private int[] buf;
 	
 	public ArrayFIFO(int capacity) {
 		int mask = capacity;
@@ -15,16 +15,16 @@ public class ArrayFIFO {
 		mask |= mask >> 8;
 		mask |= mask >> 16;
 		this.mask = mask;
-		buf = new byte[mask + 1];
+		buf = new int[mask + 1];
 	}
 	
 	public void write(byte b) {
-		buf[(write++) & mask] = b;
+		buf[(write++) & mask] = b & 0xFF;
 	}
 	
-	public byte[] read() {
+	public int[] read() {
 		int len = Math.min(write, buf.length);
-		byte[] read = new byte[len];
+		int[] read = new int[len];
 		for (int i = 0; i < len; i++){
 			read[i] = buf[(write - len + i) & mask];
 		}

@@ -3,7 +3,9 @@ package com.raphfrk.craftproxylib;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 
 import com.raphfrk.craftproxylib.fields.Field;
 import com.raphfrk.craftproxylib.packet.Packet;
@@ -19,11 +21,11 @@ import com.raphfrk.craftproxylib.packet.standard.KickPacket;
  */
 public class MCSocket {
 
-	private final boolean server;
-	private final Socket socket;
-	private final MCInputStream in;
-	private final MCOutputStream out;
-	private final String message;
+	protected final boolean server;
+	protected final Socket socket;
+	protected final MCInputStream in;
+	protected final MCOutputStream out;
+	protected final String message;
 	
 	private static final int DEFAULT_TIMEOUT = 60000;
 	
@@ -212,6 +214,18 @@ public class MCSocket {
 	
 	public boolean isClosed() {
 		return socket.isClosed();
+	}
+	
+	public SocketAddress getRemoteSocketAddress() {
+		return socket.getRemoteSocketAddress();
+	}
+	
+	public SocketAddress getLocalSocketAddress() {
+		return socket.getLocalSocketAddress();
+	}
+	
+	public InetAddress getInetAddress() {
+		return socket.getInetAddress();
 	}
 	
 }
