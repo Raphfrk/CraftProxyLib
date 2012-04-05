@@ -71,14 +71,10 @@ public class FieldItem extends Field {
 			enchanted[i] = enchantedItemsIds.contains(i);
 		}
 	}
-	
-	public FieldItem() {
-		super(2);
-	}
 
 	@Override
 	public int skip(InputStream in) throws IOException {
-		int id = FieldShort.readShort(in, buffer);
+		int id = FieldShort.readShort(in);
 		
 		if (id >= 0) {
 			int count = in.read();
@@ -86,10 +82,10 @@ public class FieldItem extends Field {
 				throw new EOFException("EOF reached");
 			}
 			
-			FieldShort.readShort(in, buffer);
+			FieldShort.readShort(in);
 			
 			if (enchanted[id]) {
-				int length = FieldShort.readShort(in, buffer);
+				int length = FieldShort.readShort(in);
 				in.skip(length);
 				return length + 7;
 			} else {
@@ -102,7 +98,7 @@ public class FieldItem extends Field {
 
 	@Override
 	public Item read(InputStream in) throws IOException {
-		short id = FieldShort.readShort(in, buffer);
+		short id = FieldShort.readShort(in);
 		
 		if (id >= 0) {
 			int count = in.read();
@@ -110,10 +106,10 @@ public class FieldItem extends Field {
 				throw new EOFException("EOF reached");
 			}
 			
-			short damage = FieldShort.readShort(in, buffer);
+			short damage = FieldShort.readShort(in);
 			
 			if (enchanted[id]) {
-				int length = FieldShort.readShort(in, buffer);
+				int length = FieldShort.readShort(in);
 				byte[] enchant = new byte[length];
 				int i = 0;
 				while (i < length) {

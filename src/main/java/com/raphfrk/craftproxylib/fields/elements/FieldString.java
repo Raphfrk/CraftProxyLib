@@ -6,29 +6,29 @@ import java.io.InputStream;
 import com.raphfrk.craftproxylib.fields.Field;
 
 public class FieldString extends Field {
-	
-	public FieldString() {
-		super(2);
-	}
 
 	@Override
 	public int skip(InputStream in) throws IOException {
-		int length = FieldShort.readShort(in, buffer);
+		int length = FieldShort.readShort(in);
 		int bytes = length << 1;
 		
 		return 2 + (int)in.skip(bytes);
 	}
 
-	@Override
-	public String read(InputStream in) throws IOException {
-		int length = FieldShort.readShort(in, buffer);
+	public static String readString(InputStream in) throws IOException {
+		int length = FieldShort.readShort(in);
 		
 		StringBuilder sb = new StringBuilder(length);
 
 		for(int cnt=0; cnt<length;cnt++) {
-			sb.append((char)FieldShort.readShort(in, buffer));
+			sb.append((char)FieldShort.readShort(in));
 		}
 		return sb.toString();
+	}
+	
+	@Override
+	public String read(InputStream in) throws IOException {
+		return readString(in);
 	}
 	
 	public static int writeString(byte[] buf, int pos, String s) {

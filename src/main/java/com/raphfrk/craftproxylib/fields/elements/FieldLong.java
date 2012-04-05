@@ -11,24 +11,23 @@ public class FieldLong extends FieldFixedLength {
 		super(8);
 	}
 
-	public static long readLong(InputStream in, byte[] buffer) throws IOException {
-		fillBuffer(buffer, in);
+	public static long readLong(InputStream in) throws IOException {
 		
 		return
-				((buffer[0])        << 56) |
-				((buffer[1] & 0xFF) << 48) |
-				((buffer[2] & 0xFF) << 40) |
-				((buffer[3] & 0xFF) << 32) |
-				((buffer[4] & 0xFF) << 24) |
-				((buffer[5] & 0xFF) << 16) |
-				((buffer[6] & 0xFF) << 8) |
-				((buffer[7] & 0xFF) << 0);
+				(getByte(in) << 56) |
+				(getByte(in) << 48) |
+				(getByte(in) << 40) |
+				(getByte(in) << 32) |
+				(getByte(in) << 24) |
+				(getByte(in) << 16) |
+				(getByte(in) << 8) |
+				(getByte(in) << 0);
 				
 	}
 
 	@Override
 	public Long read(InputStream in) throws IOException {
-		return readLong(in, buffer);
+		return readLong(in);
 	}
 	
 	public static int writeLong(byte[] buf, int pos, long i) {

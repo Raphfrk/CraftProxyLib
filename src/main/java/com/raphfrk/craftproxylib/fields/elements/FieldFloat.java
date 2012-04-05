@@ -11,16 +11,16 @@ public class FieldFloat extends FieldFixedLength {
 		super(4);
 	}
 
-	public static float readFloat(InputStream in, byte[] buffer) throws IOException {
+	public static float readFloat(InputStream in) throws IOException {
 		
-		int intValue = FieldInteger.readInt(in, buffer);
+		int intValue = FieldInteger.readInt(in);
 
 		return Float.intBitsToFloat(intValue);
 	}
 
 	@Override
 	public Float read(InputStream in) throws IOException {
-		return readFloat(in, buffer);
+		return readFloat(in);
 	}
 	
 	public static int writeFloat(byte[] buf, int pos, float i) {

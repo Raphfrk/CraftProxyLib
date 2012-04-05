@@ -13,7 +13,7 @@ public class FieldEntityId extends FieldFixedLength {
 
 	@Override
 	public Integer read(InputStream in) throws IOException {
-		return FieldInteger.readInt(in, buffer);
+		return FieldInteger.readInt(in);
 	}
 	
 	@Override

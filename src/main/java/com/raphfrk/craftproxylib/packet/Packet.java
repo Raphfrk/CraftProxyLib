@@ -88,7 +88,7 @@ public class Packet extends InputStream {
 			}
 			return b;
 		} else {
-			return buf[pos++];
+			return buf[pos++] & 0xFF;
 		}
 	}
 	

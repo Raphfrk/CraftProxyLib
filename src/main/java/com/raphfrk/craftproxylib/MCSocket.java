@@ -1,11 +1,13 @@
 package com.raphfrk.craftproxylib;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.Arrays;
 
 import com.raphfrk.craftproxylib.fields.Field;
 import com.raphfrk.craftproxylib.packet.Packet;
@@ -123,7 +125,9 @@ public class MCSocket {
 		if (in == null) {
 			throw new IOException("Input stream was not correctly opened");
 		}
+
 		p = in.readPacket(p);
+			
 		if (p.getId() == 0) {
 			if (!server) {
 				Integer i = (Integer)Field.read(p, 0);
@@ -210,6 +214,10 @@ public class MCSocket {
 		if (e != null) {
 			throw new IOException("Unable to close MCSocket", e);
 		}
+	}
+	
+	public void printRecentPacketIds() {
+		in.printRecentPacketIds();
 	}
 	
 	public boolean isClosed() {

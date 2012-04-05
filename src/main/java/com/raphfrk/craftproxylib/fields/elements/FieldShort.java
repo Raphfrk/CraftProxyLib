@@ -11,15 +11,13 @@ public class FieldShort extends FieldFixedLength {
 		super(2);
 	}
 
-	public static short readShort(InputStream in, byte[] buffer) throws IOException {
-		fillBuffer(buffer, in);
-		
-		return (short)((buffer[0] << 8) | (buffer[1] & 0xFF));
+	public static short readShort(InputStream in) throws IOException {
+		return (short)((getByte(in) << 8) | getByte(in));
 	}
 
 	@Override
 	public Short read(InputStream in) throws IOException {
-		return readShort(in, buffer);
+		return readShort(in);
 	}
 	
 	public static int writeShort(byte[] buf, int pos, short i) {

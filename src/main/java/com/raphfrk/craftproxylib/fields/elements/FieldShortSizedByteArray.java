@@ -8,20 +8,16 @@ import com.raphfrk.craftproxylib.fields.Field;
 
 public class FieldShortSizedByteArray extends Field {
 	
-	public FieldShortSizedByteArray() {
-		super(2);
-	}
-	
 	@Override
 	public int skip(InputStream in) throws IOException {
-		int length = FieldShort.readShort(in, buffer);
+		int length = FieldShort.readShort(in);
 		
 		return 2 + (int)in.skip(length);
 	}
 
 	@Override
 	public byte[] read(InputStream in) throws IOException {
-		int length = FieldShort.readShort(in, buffer);
+		int length = FieldShort.readShort(in);
 		
 		byte[] buf = new byte[length];
 		int i = 0;

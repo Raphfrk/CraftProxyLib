@@ -11,20 +11,19 @@ public class FieldInteger extends FieldFixedLength {
 		super(4);
 	}
 
-	public static int readInt(InputStream in, byte[] buffer) throws IOException {
-		fillBuffer(buffer, in);
-		
+	public static int readInt(InputStream in) throws IOException {
+
 		return
-				((buffer[0] & 0xFF) << 24) |
-				((buffer[1] & 0xFF) << 16) |
-				((buffer[2] & 0xFF) << 8) |
-				((buffer[3] & 0xFF) << 0);
+				(getByte(in) << 24) |
+				(getByte(in) << 16) |
+				(getByte(in) << 8) |
+				(getByte(in) << 0);
 			
 	}
 
 	@Override
 	public Integer read(InputStream in) throws IOException {
-		return readInt(in, buffer);
+		return readInt(in);
 	}
 	
 	public static int writeInt(byte[] buf, int pos, int i) {

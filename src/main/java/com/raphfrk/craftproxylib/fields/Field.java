@@ -228,16 +228,6 @@ public abstract class Field {
 		return entityIdInfo[i];
 	}
 	
-	protected final byte[] buffer;
-	
-	public Field() {
-		buffer = null;
-	}
-	
-	public Field(int bufferSize) {
-		this.buffer = new byte[bufferSize];
-	}
-
 	/**
 	 * Skips over a packet field from an InputStream.<br>
 	 * 
@@ -356,19 +346,12 @@ public abstract class Field {
 		return sb.toString();
 	}
 	
-	public static void fillBuffer(byte[] buffer, InputStream in) throws IOException {
-		if (buffer == null) {
-			throw new NullPointerException("Buffer is null");
-		}
-		
-		int i = 0;
-		while (i < buffer.length) {
-			int b = in.read(buffer, i, buffer.length - i);
-			if (b == -1) {
-				throw new EOFException("EOF reached");
-			} else {
-				i += b;
-			}
+	public static int getByte(InputStream in) throws IOException {
+		int b = in.read();
+		if (b == -1) {
+			throw new EOFException("EOF reached");
+		} else {
+			return b;
 		}
 	}
 	

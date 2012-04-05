@@ -9,14 +9,10 @@ import com.raphfrk.craftproxylib.fields.values.Item;
 public class FieldIntSizedItemArray extends Field {
 	
 	private FieldItem fItem = new FieldItem();
-	
-	public FieldIntSizedItemArray() {
-		super(2);
-	}
 
 	@Override
 	public int skip(InputStream in) throws IOException {
-		int length = FieldShort.readShort(in, buffer) & 0xFFFF;
+		int length = FieldShort.readShort(in) & 0xFFFF;
 		
 		int skipped = 4;
 		for (int i = 0; i < length; i++) {
@@ -28,7 +24,7 @@ public class FieldIntSizedItemArray extends Field {
 
 	@Override
 	public Item[] read(InputStream in) throws IOException {
-		int length = FieldShort.readShort(in, buffer) & 0xFFFF;
+		int length = FieldShort.readShort(in) & 0xFFFF;
 
 		Item[] itemArray = new Item[length];
 		

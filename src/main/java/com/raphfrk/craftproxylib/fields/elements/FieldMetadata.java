@@ -8,10 +8,6 @@ import java.util.ArrayList;
 import com.raphfrk.craftproxylib.fields.Field;
 
 public class FieldMetadata extends Field {
-	
-	public FieldMetadata() {
-		super(4);
-	}
 
 	private FieldByte fByte = new FieldByte(false);
 	private FieldString fString = new FieldString();
@@ -56,37 +52,37 @@ public class FieldMetadata extends Field {
 			b = (b & 0xFF) >> 5;
 			switch(b) {
 			case 0: {
-				data.add((byte)fByte.readByte(in));
+				data.add(fByte.readByte(in));
 				break;
 			}
 			case 1: {
-				data.add((short)FieldShort.readShort(in, shortBuf));
+				data.add(FieldShort.readShort(in));
 				break;
 			}
 			case 2: {
-				data.add((int)FieldInteger.readInt(in, buffer));
+				data.add(FieldInteger.readInt(in));
 				break;
 			}
 			case 3: {
-				data.add((float)FieldFloat.readFloat(in, buffer));
+				data.add(FieldFloat.readFloat(in));
 				break;
 			}
 			case 4: {
-				data.add(fString.read(in));
+				data.add(FieldString.readString(in));
 				break;
 			}
 			case 5: {
-				short aa = FieldShort.readShort(in, shortBuf);
+				short aa = FieldShort.readShort(in);
 				byte bb = (byte)fByte.readByte(in);
-				short cc = FieldShort.readShort(in, shortBuf);
+				short cc = FieldShort.readShort(in);
 				
 				data.add(new Object[] {aa , bb, cc});
 				break;
 			}
 			case 6: {
-				int aa = FieldInteger.readInt(in, buffer);
-				int bb = FieldInteger.readInt(in, buffer);
-				int cc = FieldInteger.readInt(in, buffer);
+				int aa = FieldInteger.readInt(in);
+				int bb = FieldInteger.readInt(in);
+				int cc = FieldInteger.readInt(in);
 				
 				data.add(new Object[] {aa , bb, cc});
 				break;

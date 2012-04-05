@@ -8,14 +8,10 @@ import com.raphfrk.craftproxylib.fields.Field;
 import com.raphfrk.craftproxylib.fields.values.ByteArrayWithInt;
 
 public class FieldIntSizedByteArrayWithInt extends Field {
-	
-	public FieldIntSizedByteArrayWithInt() {
-		super(4);
-	}
 
 	@Override
 	public int skip(InputStream in) throws IOException {
-		int length = FieldInteger.readInt(in, buffer);
+		int length = FieldInteger.readInt(in);
 		in.skip(4);
 		
 		return 8 + (int)in.skip(length);
@@ -23,9 +19,9 @@ public class FieldIntSizedByteArrayWithInt extends Field {
 
 	@Override
 	public ByteArrayWithInt read(InputStream in) throws IOException {
-		int length = FieldInteger.readInt(in, buffer);
+		int length = FieldInteger.readInt(in);
 
-		int d = FieldInteger.readInt(in, buffer);
+		int d = FieldInteger.readInt(in);
 		
 		byte[] buf = new byte[length];
 		int i = 0;

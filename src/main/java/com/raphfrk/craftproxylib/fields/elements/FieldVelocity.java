@@ -8,15 +8,9 @@ import com.raphfrk.craftproxylib.fields.values.Velocity;
 
 public class FieldVelocity extends Field {
 
-	byte[] shortBuffer = new byte[2];
-	
-	public FieldVelocity() {
-		super(4);
-	}
-
 	@Override
 	public int skip(InputStream in) throws IOException {
-		int eid = FieldInteger.readInt(in, buffer);
+		int eid = FieldInteger.readInt(in);
 		
 		if (eid != 0) {
 			in.skip(6);
@@ -28,12 +22,12 @@ public class FieldVelocity extends Field {
 
 	@Override
 	public Velocity read(InputStream in) throws IOException {
-		int eid = FieldInteger.readInt(in, buffer);
+		int eid = FieldInteger.readInt(in);
 
 		if (eid != 0) {
-			short vx = FieldShort.readShort(in, shortBuffer);
-			short vy = FieldShort.readShort(in, shortBuffer);
-			short vz = FieldShort.readShort(in, shortBuffer);
+			short vx = FieldShort.readShort(in);
+			short vy = FieldShort.readShort(in);
+			short vz = FieldShort.readShort(in);
 			return new Velocity(eid, vx, vy, vz);
 		} else {
 			return new Velocity(eid);

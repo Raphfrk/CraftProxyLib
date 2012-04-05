@@ -88,8 +88,7 @@ public class MCInputStream extends FilterInputStream {
 		Field[] fields = Field.getCompressedFields(id);
 		
 		if (fields == null) {
-			int[] oldIds = packetIds.read();
-			System.out.println("Packet ids: " + Arrays.toString(oldIds));
+			printRecentPacketIds();
 			throw new IOException("Unknown packet id 0x" + Integer.toHexString(id));
 		}
 		
@@ -108,6 +107,11 @@ public class MCInputStream extends FilterInputStream {
 		packet = null;
 		
 		return r;
+	}
+	
+	public void printRecentPacketIds() {
+		int[] oldIds = packetIds.read();
+		System.out.println("Packet ids: " + Arrays.toString(oldIds));
 	}
 	
 	public void setServerEntityId(int entityId) {

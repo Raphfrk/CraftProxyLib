@@ -7,19 +7,21 @@ import java.io.InputStream;
  * Represents a fixed length field
  */
 public class FieldFixedLength extends Field {
+
+	private final int length;
 	
 	public FieldFixedLength(int length) {
-		super(length);
+		this.length = length;
 	}
 
 	@Override
 	public int getFixedLength() {
-		return buffer.length;
+		return length;
 	}
 
 	@Override
 	public int skip(InputStream in) throws IOException {
-		return (int)in.skip(buffer.length);
+		return (int)in.skip(length);
 	}
 
 	@Override

@@ -11,13 +11,13 @@ public class FieldChar extends FieldFixedLength {
 		super(2);
 	}
 
-	public static char readCharacter(InputStream in, byte[] buffer) throws IOException {
-		return (char)FieldShort.readShort(in, buffer);
+	public static char readCharacter(InputStream in) throws IOException {
+		return (char)FieldShort.readShort(in);
 	}
 
 	@Override
 	public Character read(InputStream in) throws IOException {
-		return readCharacter(in, buffer);
+		return readCharacter(in);
 	}
 	
 	public static int writeCharacter(byte[] buf, int pos, char i) {

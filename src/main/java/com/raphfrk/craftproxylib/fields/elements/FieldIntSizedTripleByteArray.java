@@ -7,14 +7,10 @@ import java.io.InputStream;
 import com.raphfrk.craftproxylib.fields.Field;
 
 public class FieldIntSizedTripleByteArray extends Field {
-	
-	public FieldIntSizedTripleByteArray() {
-		super(4);
-	}
 
 	@Override
 	public int skip(InputStream in) throws IOException {
-		int length = FieldInteger.readInt(in, buffer);
+		int length = FieldInteger.readInt(in);
 		
 		length += length << 1;
 		
@@ -23,7 +19,7 @@ public class FieldIntSizedTripleByteArray extends Field {
 
 	@Override
 	public byte[] read(InputStream in) throws IOException {
-		int length = FieldInteger.readInt(in, buffer);
+		int length = FieldInteger.readInt(in);
 
 		length += length << 1;
 		

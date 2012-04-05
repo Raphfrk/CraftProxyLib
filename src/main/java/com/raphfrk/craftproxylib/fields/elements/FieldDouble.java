@@ -11,16 +11,16 @@ public class FieldDouble extends FieldFixedLength {
 		super(8);
 	}
 
-	public static double readDouble(InputStream in, byte[] buffer) throws IOException {
+	public static double readDouble(InputStream in) throws IOException {
 		
-		long longValue = FieldLong.readLong(in, buffer);
+		long longValue = FieldLong.readLong(in);
 
 		return Double.longBitsToDouble(longValue);
 	}
 
 	@Override
 	public Double read(InputStream in) throws IOException {
-		return readDouble(in, buffer);
+		return readDouble(in);
 	}
 
 	public static int writeDouble(byte[] buf, int pos, double i) {
