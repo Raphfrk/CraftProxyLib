@@ -7,6 +7,11 @@ import com.raphfrk.craftproxylib.fields.FieldFixedLength;
 
 public class FieldEntityId extends FieldFixedLength {
 	
+	@Override
+	public FieldEntityId newInstance() {
+		return new FieldEntityId();
+	}
+	
 	public FieldEntityId() {
 		super(4);
 	}

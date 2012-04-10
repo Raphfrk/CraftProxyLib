@@ -46,10 +46,8 @@ public class MCOutputStream extends FilterOutputStream {
 		out.write(buf, off, length - off);
 	}
 	
-	public synchronized void close(String message) throws IOException {
-		writePacket(new KickPacket(message));
-		super.flush();
-		super.close();
+	public synchronized void close() throws IOException {
+		throw new IllegalStateException("Use MCSocket.close() to close streams");
 	}
 	
 	public synchronized void flush() throws IOException {

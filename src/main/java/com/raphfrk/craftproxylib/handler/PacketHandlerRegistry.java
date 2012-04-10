@@ -55,21 +55,41 @@ public class PacketHandlerRegistry {
 	}
 	
 	/**
-	 * Gets the upstream handler array
+	 * Creates an array of handlers for handling upstream packets.<br>
+	 * <br>
+	 * Each MCBridge gets its own instances of all the handlers
 	 * 
 	 * @return an array of AtomicReferences
 	 */
-	public AtomicReference<PacketHandler>[] getUpstreamHandlers() {
-		return this.upstreamHandlers;
+	public PacketHandler[] getUpstreamHandlers() {
+		int length = upstreamHandlers.length;
+		PacketHandler[] handlers = new PacketHandler[length];
+		for (int i = 0; i < length; i++) {
+			PacketHandler handler = upstreamHandlers[i].get();
+			if (handler != null) {
+				handlers[i] = handler.newInstance();
+			}
+		}
+		return handlers;
 	}
 	
 	/**
-	 * Gets the downstream handler array
+	 * Creates an array of handlers for handling downstream packets.<br>
+	 * <br>
+	 * Each MCBridge gets its own instances of all the handlers
 	 * 
 	 * @return an array of AtomicReferences
 	 */
-	public AtomicReference<PacketHandler>[] getDownstreamHandlers() {
-		return this.downstreamHandlers;
+	public PacketHandler[] getDownstreamHandlers() {
+		int length = downstreamHandlers.length;
+		PacketHandler[] handlers = new PacketHandler[length];
+		for (int i = 0; i < length; i++) {
+			PacketHandler handler = downstreamHandlers[i].get();
+			if (handler != null) {
+				handlers[i] = handler.newInstance();
+			}
+		}
+		return handlers;	
 	}
 	
 }

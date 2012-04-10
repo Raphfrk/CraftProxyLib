@@ -8,6 +8,11 @@ import com.raphfrk.craftproxylib.fields.Field;
 public class FieldString extends Field {
 
 	@Override
+	public FieldString newInstance() {
+		return new FieldString();
+	}
+	
+	@Override
 	public int skip(InputStream in) throws IOException {
 		int length = FieldShort.readShort(in);
 		int bytes = length << 1;

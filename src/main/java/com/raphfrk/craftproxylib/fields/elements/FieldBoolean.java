@@ -7,6 +7,11 @@ import java.io.InputStream;
 import com.raphfrk.craftproxylib.fields.FieldFixedLength;
 
 public class FieldBoolean extends FieldFixedLength {
+
+	@Override
+	public FieldBoolean newInstance() {
+		return new FieldBoolean();
+	}
 	
 	public FieldBoolean() {
 		super(1);

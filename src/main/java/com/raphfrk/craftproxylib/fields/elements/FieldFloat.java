@@ -7,6 +7,11 @@ import com.raphfrk.craftproxylib.fields.FieldFixedLength;
 
 public class FieldFloat extends FieldFixedLength {
 
+	@Override
+	public FieldFloat newInstance() {
+		return new FieldFloat();
+	}
+	
 	public FieldFloat() {
 		super(4);
 	}

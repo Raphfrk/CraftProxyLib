@@ -17,6 +17,7 @@ public class LoginInfo {
 	private final int dimension;
 	private final MCSocket server;
 	private final MCSocket client;
+	private final boolean isServerPing;
 	
 	private final String error;
 	
@@ -35,6 +36,28 @@ public class LoginInfo {
 		this.dimension = 0;
 		this.server = null;
 		this.client = null;
+		this.isServerPing = false;
+	}
+	
+	public LoginInfo(boolean serverPing, MCSocket client, MCSocket server) {
+		this.error = null;
+		this.username = null;
+		this.port = -1;
+		this.hostname = null;
+		this.levelType = null;
+		this.serverMode = 0;
+		this.entityId = 0;
+		this.unused = 0;
+		this.difficulty = 0;
+		this.maxPlayers = 0;
+		this.hash = null;
+		this.dimension = 0;
+		this.server = server;
+		this.client = client;
+		this.isServerPing = serverPing;
+		if (!serverPing) {
+			throw new IllegalArgumentException("Server ping must be true for server pings");
+		}
 	}
 	
 	public LoginInfo(String username, String hostname, int port) {
@@ -128,6 +151,7 @@ public class LoginInfo {
 		this.dimension = dimension;
 		this.server = server;
 		this.client = client;
+		this.isServerPing = false;
 	}
 
 	
@@ -189,6 +213,10 @@ public class LoginInfo {
 	
 	public MCSocket getClientSocket() {
 		return client;
+	}
+	
+	public boolean isServerPing() {
+		return isServerPing;
 	}
 
 	public String toString() {

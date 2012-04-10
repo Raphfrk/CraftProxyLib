@@ -7,6 +7,11 @@ import com.raphfrk.craftproxylib.fields.FieldFixedLength;
 
 public class FieldChar extends FieldFixedLength {
 
+	@Override
+	public FieldChar newInstance() {
+		return new FieldChar();
+	}
+	
 	public FieldChar() {
 		super(2);
 	}

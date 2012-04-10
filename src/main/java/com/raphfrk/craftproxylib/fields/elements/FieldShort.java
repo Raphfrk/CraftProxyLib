@@ -6,6 +6,11 @@ import java.io.InputStream;
 import com.raphfrk.craftproxylib.fields.FieldFixedLength;
 
 public class FieldShort extends FieldFixedLength {
+	
+	@Override
+	public FieldShort newInstance() {
+		return new FieldShort();
+	}
 
 	public FieldShort() {
 		super(2);

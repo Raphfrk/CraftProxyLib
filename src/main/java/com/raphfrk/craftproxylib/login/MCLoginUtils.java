@@ -11,12 +11,9 @@ import com.raphfrk.craftproxylib.MCSocket;
 import com.raphfrk.craftproxylib.packet.Packet;
 import com.raphfrk.craftproxylib.packet.standard.HandshakePacket;
 import com.raphfrk.craftproxylib.packet.standard.LoginPacket;
-import com.raphfrk.craftproxylib.util.ConcurrentTimedOutHashMap;
 import com.raphfrk.craftproxylib.util.NetworkUtils;
 
 public class MCLoginUtils {
-	
-	private static final ConcurrentTimedOutHashMap<InetAddress, Long> floodShield = new ConcurrentTimedOutHashMap<InetAddress, Long>(60000);
 	
 	/**
 	 * Handles a client login.  If there is a connect map match, the proxy will connect to that server.<br>
@@ -39,7 +36,7 @@ public class MCLoginUtils {
 		
 		LoginInfo info = MCLoginUtils.acceptClientHandshake(mClient, null);
 		
-		if (info.getError() != null) {
+		if (info.getError() != null || info.isServerPing()) {
 			return info;
 		}
 		
@@ -65,7 +62,7 @@ public class MCLoginUtils {
 		InetAddress serverIP = serverAddr.getAddress();
 		int serverPort = serverAddr.getPort();
 		
-		if (rotateIP || NetworkUtils.isLocal(serverAddr.getAddress())) {
+		if (rotateIP && NetworkUtils.isLocal(serverAddr.getAddress())) {
 			InetAddress connectFromAddress = NetworkUtils.getNextLocalIP();
 			server = new Socket(serverIP, serverPort, connectFromAddress, 0);
 		} else {
@@ -104,19 +101,7 @@ public class MCLoginUtils {
 	 * @throws IOException
 	 */
 	public static LoginInfo acceptClientHandshake(MCSocket socket) throws IOException {
-		return acceptClientHandshake(socket, 5000);
-	}
-	
-	/**
-	 * Reads a client login handshake from a socket
-	 * 
-	 * @param socket
-	 * @param floodTimeout the minimum timeout between connections from the same server in ms, or zero for no timeout
-	 * @return the info provided by the client on login
-	 * @throws IOException
-	 */
-	public static LoginInfo acceptClientHandshake(MCSocket socket, int floodTimeout) throws IOException {
-		return acceptClientHandshake(socket, null, floodTimeout);
+		return acceptClientHandshake(socket, null);
 	}
 	
 	/**
@@ -128,35 +113,7 @@ public class MCLoginUtils {
 	 * @throws IOException
 	 */
 	public static LoginInfo acceptClientHandshake(MCSocket client, MCSocket server) throws IOException {
-		return acceptClientHandshake(client, server, 5000);
-	}
-		
-	/**
-	 * Reads a client login handshake from a socket and forwards it to a server
-	 * 
-	 * @param client the client socket
-	 * @param server the server socket to forward any packets to
-	 * @param floodTimeout the minimum timeout between connections from the same server in ms, or zero for no timeout
-	 * @return the info provided by the client on login
-	 * @throws IOException
-	 */
-	public static LoginInfo acceptClientHandshake(MCSocket client, MCSocket server, int floodTimeout) throws IOException {
 
-		InetAddress a = client.getInetAddress();
-
-		long currentTime = System.currentTimeMillis();
-		
-		if (floodTimeout > 0 ) {
-			Long lastConnect = floodShield.get(a);
-			if (lastConnect != null) {
-				if (currentTime - lastConnect < floodTimeout) {
-					return error("Socket disconnected due to flood protection", client, server);
-				}
-			}
-		}
-		
-		floodShield.put(a, System.currentTimeMillis());
-		
 		Packet p = new Packet();
 		
 		do {
@@ -165,6 +122,10 @@ public class MCLoginUtils {
 				server.writePacket(p);
 			}
 		} while (p.getId() == 0xFA);
+		
+		if (p.getId() == 0xFE) {
+			return new LoginInfo(true, client, server);
+		}
 		
 		if (p.getId() != 2) {
 			return error("Client did not send handshake packet", client, server);

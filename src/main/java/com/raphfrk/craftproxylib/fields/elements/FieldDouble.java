@@ -7,6 +7,11 @@ import com.raphfrk.craftproxylib.fields.FieldFixedLength;
 
 public class FieldDouble extends FieldFixedLength {
 
+	@Override
+	public FieldDouble newInstance() {
+		return new FieldDouble();
+	}
+	
 	public FieldDouble() {
 		super(8);
 	}

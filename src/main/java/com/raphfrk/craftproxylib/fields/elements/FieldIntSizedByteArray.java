@@ -7,6 +7,11 @@ import java.io.InputStream;
 import com.raphfrk.craftproxylib.fields.Field;
 
 public class FieldIntSizedByteArray extends Field {
+	
+	@Override
+	public FieldIntSizedByteArray newInstance() {
+		return new FieldIntSizedByteArray();
+	}
 
 	@Override
 	public int skip(InputStream in) throws IOException {
@@ -30,6 +35,5 @@ public class FieldIntSizedByteArray extends Field {
 		}
 		return buf;
 	}
-
 
 }

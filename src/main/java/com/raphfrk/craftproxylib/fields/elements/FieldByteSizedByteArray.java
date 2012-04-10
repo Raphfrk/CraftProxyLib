@@ -8,6 +8,11 @@ import com.raphfrk.craftproxylib.fields.Field;
 
 public class FieldByteSizedByteArray extends Field {
 	
+	@Override
+	public FieldByteSizedByteArray newInstance() {
+		return new FieldByteSizedByteArray();
+	}
+	
 	private FieldByte fByte = new FieldByte(true);
 	
 	@Override
@@ -32,6 +37,5 @@ public class FieldByteSizedByteArray extends Field {
 		}
 		return buf;
 	}
-
 
 }

@@ -6,7 +6,12 @@ import java.io.InputStream;
 import com.raphfrk.craftproxylib.fields.Field;
 import com.raphfrk.craftproxylib.fields.values.Item;
 
-public class FieldIntSizedItemArray extends Field {
+public class FieldShortSizedItemArray extends Field {
+	
+	@Override
+	public FieldShortSizedItemArray newInstance() {
+		return new FieldShortSizedItemArray();
+	}
 	
 	private FieldItem fItem = new FieldItem();
 

@@ -13,7 +13,7 @@ import com.raphfrk.craftproxylib.fields.elements.FieldEntityId;
 import com.raphfrk.craftproxylib.fields.elements.FieldFloat;
 import com.raphfrk.craftproxylib.fields.elements.FieldIntSizedByteArray;
 import com.raphfrk.craftproxylib.fields.elements.FieldIntSizedByteArrayWithInt;
-import com.raphfrk.craftproxylib.fields.elements.FieldIntSizedItemArray;
+import com.raphfrk.craftproxylib.fields.elements.FieldShortSizedItemArray;
 import com.raphfrk.craftproxylib.fields.elements.FieldIntSizedTripleByteArray;
 import com.raphfrk.craftproxylib.fields.elements.FieldInteger;
 import com.raphfrk.craftproxylib.fields.elements.FieldItem;
@@ -73,7 +73,7 @@ public abstract class Field {
 	private final static FieldByteSizedByteArray fByteSizedByteArray = new FieldByteSizedByteArray();
 	
 	private final static FieldItem fItem = new FieldItem();
-	private final static FieldIntSizedItemArray fIntSizedItemArray = new FieldIntSizedItemArray();
+	private final static FieldShortSizedItemArray fShortSizedItemArray = new FieldShortSizedItemArray();
 	private final static FieldVelocity fVelocity = new FieldVelocity();
 	private final static FieldMetadata fMetadata = new FieldMetadata();
 	
@@ -153,7 +153,7 @@ public abstract class Field {
 		map[0x65] = new Field[] {fByte};
 		map[0x66] = new Field[] {fByte, fShort, fByte, fShort, fBoolean, fItem};
 		map[0x67] = new Field[] {fByte, fShort, fItem};
-		map[0x68] = new Field[] {fByte, fIntSizedItemArray};
+		map[0x68] = new Field[] {fByte, fShortSizedItemArray};
 		map[0x69] = new Field[] {fByte, fShort, fShort};
 		map[0x6A] = new Field[] {fByte, fShort, fBoolean};
 		map[0x6B] = new Field[] {fShort, fItem};
@@ -270,6 +270,13 @@ public abstract class Field {
 	public int getFixedLength() {
 		return -1;
 	}
+	
+	/**
+	 * Returns a new instance of the field
+	 * 
+	 * @return
+	 */
+	public abstract Field newInstance();
 	
 	/**
 	 * Reads a packet field from a Packet.

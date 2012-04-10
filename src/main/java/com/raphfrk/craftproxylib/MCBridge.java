@@ -3,7 +3,6 @@ package com.raphfrk.craftproxylib;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.raphfrk.craftproxylib.handler.PacketHandler;
 import com.raphfrk.craftproxylib.handler.PacketHandlerRegistry;
@@ -16,6 +15,8 @@ public class MCBridge {
 	
 	private final MCPassthroughThread serverToClientThread;
 	private final MCPassthroughThread clientToServerThread;
+	private final PacketHandler[] upstream;
+	private final PacketHandler[] downstream;
 	
 	private static final PacketHandlerRegistry nullRegistry = new PacketHandlerRegistry();
 	
@@ -32,10 +33,21 @@ public class MCBridge {
 	}
 	
 	public MCBridge(MCSocket server, MCSocket client, PacketHandlerRegistry registry) {
+		this(server, client, registry.getUpstreamHandlers(), registry.getDownstreamHandlers());
+	}
+	
+	public MCBridge(MCSocket server, MCSocket client, MCBridge bridge) {
+		this(server, client, bridge.getUpstreamHandlers(), bridge.getDownstreamHandlers());
+	}
+	
+	public MCBridge(MCSocket server, MCSocket client,  PacketHandler[] upstream, PacketHandler[] downstream) {
 		AtomicBoolean closeSync = new AtomicBoolean(false);
 		
-		this.serverToClientThread = new MCPassthroughThread(server, client, closeSync, registry.getDownstreamHandlers());
-		this.clientToServerThread = new MCPassthroughThread(client, server, closeSync, registry.getUpstreamHandlers());
+		this.upstream = upstream;
+		this.downstream = downstream;
+		
+		this.serverToClientThread = new MCPassthroughThread(server, client, closeSync, downstream);
+		this.clientToServerThread = new MCPassthroughThread(client, server, closeSync, upstream);
 		
 		this.serverToClientThread.setReturnThread(clientToServerThread);
 		this.clientToServerThread.setReturnThread(serverToClientThread);
@@ -83,10 +95,30 @@ public class MCBridge {
 		}
 		clientToServerThread.join(millis);
 	}
+	
+	/**
+	 * Gets the upstream handler instance array.
+	 * 
+	 * @return the handlers
+	 */
+	public PacketHandler[] getUpstreamHandlers() {
+		return this.upstream;
+	}
+	
+	/**
+	 * Gets the upstream handler instance array.
+	 * 
+	 * @return the handlers
+	 */
+	public PacketHandler[] getDownstreamHandlers() {
+		return this.downstream;
+	}
 
 	private static class MCPassthroughThread extends Thread {
 		
-		private final AtomicReference<PacketHandler>[] handlers;
+		private static final PacketHandler[] nullList = new PacketHandler[256];
+		
+		private final PacketHandler[] handlers;
 		private final AtomicBoolean closeSync;
 		
 		private MCPassthroughThread counterFlowThread = null;
@@ -98,10 +130,14 @@ public class MCBridge {
 		private volatile boolean safeDeath = false;
 
 		
-		public MCPassthroughThread(MCSocket from, MCSocket to, AtomicBoolean closeSync, AtomicReference<PacketHandler>[] handlers) {
+		public MCPassthroughThread(MCSocket from, MCSocket to, AtomicBoolean closeSync, PacketHandler[] handlers) {
 			this.from = from;
 			this.to = to;
-			this.handlers = handlers;
+			if (handlers == null) {
+				this.handlers = nullList;
+			} else {
+				this.handlers = handlers;
+			}
 			this.closeSync = closeSync;
 		}
 		
@@ -139,6 +175,11 @@ public class MCBridge {
 						readError = true;
 						ioe.printStackTrace();
 						continue;
+					} catch (Exception e) {
+						running = false;
+						readError = true;
+						e.printStackTrace();
+						continue;
 					}
 					int id = p.getId();
 					if (id == -1) {
@@ -146,7 +187,7 @@ public class MCBridge {
 						running = false;
 						throw new IllegalStateException("Incomplete packet read");
 					}
-					PacketHandler handler = handlers[id].get();
+					PacketHandler handler = handlers[id];
 					if (handler != null) {
 						try {
 							p = handler.handle(p, to.getOutputStream(), from.getOutputStream());
@@ -169,6 +210,10 @@ public class MCBridge {
 							to.writePacket(p);
 						} catch (IOException ioe) {
 							ioe.printStackTrace();
+							running = false;
+							writeError = true;
+						} catch (Exception e) {
+							e.printStackTrace();
 							running = false;
 							writeError = true;
 						}

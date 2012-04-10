@@ -17,4 +17,10 @@ public class KickPacket extends Packet {
 		setDone();
 	}
 	
+	public static String generatePing(String motd, int players, int maxPlayers) {
+		char delim = (char)0xA7;
+		
+		return motd + delim + players + delim + maxPlayers;
+	}
+	
 }

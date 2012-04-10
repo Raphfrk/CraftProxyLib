@@ -9,6 +9,11 @@ import com.raphfrk.craftproxylib.fields.Field;
 public class FieldShortSizedByteArray extends Field {
 	
 	@Override
+	public FieldShortSizedByteArray newInstance() {
+		return new FieldShortSizedByteArray();
+	}
+	
+	@Override
 	public int skip(InputStream in) throws IOException {
 		int length = FieldShort.readShort(in);
 		

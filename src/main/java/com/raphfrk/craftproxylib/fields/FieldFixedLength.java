@@ -7,8 +7,12 @@ import java.io.InputStream;
  * Represents a fixed length field
  */
 public class FieldFixedLength extends Field {
-
+	
 	private final int length;
+
+	public FieldFixedLength newInstance() {
+		return new FieldFixedLength(length);
+	}
 	
 	public FieldFixedLength(int length) {
 		this.length = length;

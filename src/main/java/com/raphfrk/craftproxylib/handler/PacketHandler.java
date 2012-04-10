@@ -26,4 +26,6 @@ public abstract class PacketHandler {
 		return packet;
 	}
 	
+	public abstract PacketHandler newInstance();
+	
 }

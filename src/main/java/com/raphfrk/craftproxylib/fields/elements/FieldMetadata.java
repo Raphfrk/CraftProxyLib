@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import com.raphfrk.craftproxylib.fields.Field;
 
 public class FieldMetadata extends Field {
+	
+	@Override
+	public FieldMetadata newInstance() {
+		return new FieldMetadata();
+	}
 
 	private FieldByte fByte = new FieldByte(false);
 	private FieldString fString = new FieldString();

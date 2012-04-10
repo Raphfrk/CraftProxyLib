@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.Arrays;
 
 import com.raphfrk.craftproxylib.fields.Field;
 import com.raphfrk.craftproxylib.packet.Packet;
@@ -76,7 +75,12 @@ public class MCSocket {
 	 * @throws IOException 
 	 */
 	public MCSocket(Socket socket, boolean server, int timeout, String message) throws IOException {
-		socket.setSoTimeout(timeout);
+		try {
+			socket.setSoTimeout(timeout);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw e;
+		}
 		InputStream in = null;
 		OutputStream out = null;
 		try {
@@ -185,31 +189,18 @@ public class MCSocket {
 			e = ioe;
 		}
 		try {
-			if (out != null) {
-				out.close();
+			socket.shutdownOutput();
+			while (true) {
+				in.readPacket();
 			}
+		} catch (EOFException eof) {
 		} catch (IOException ioe) {
+			ioe.printStackTrace();
 			if (e == null) {
 				e = ioe;
 			}
-		}
-		try {
-			if (in != null) {
-				in.close();
-			}
-		} catch (IOException ioe) {
-			if (e == null) {
-				e = ioe;
-			}
-		}
-		try {
-			if (socket != null) {
-				socket.close();
-			}
-		} catch (IOException ioe) {
-			if (e == null) {
-				e = ioe;
-			}
+		} finally {
+			socket.close();
 		}
 		if (e != null) {
 			throw new IOException("Unable to close MCSocket", e);

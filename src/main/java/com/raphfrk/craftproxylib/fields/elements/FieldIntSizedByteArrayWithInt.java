@@ -10,6 +10,11 @@ import com.raphfrk.craftproxylib.fields.values.ByteArrayWithInt;
 public class FieldIntSizedByteArrayWithInt extends Field {
 
 	@Override
+	public FieldIntSizedByteArrayWithInt newInstance() {
+		return new FieldIntSizedByteArrayWithInt();
+	}
+	
+	@Override
 	public int skip(InputStream in) throws IOException {
 		int length = FieldInteger.readInt(in);
 		in.skip(4);

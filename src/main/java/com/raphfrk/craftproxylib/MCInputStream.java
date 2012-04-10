@@ -93,7 +93,11 @@ public class MCInputStream extends FilterInputStream {
 		}
 		
 		for (int f = 0; f < fields.length; f++) {
-			fields[f].skip(packet);
+			try {
+				fields[f].skip(packet);
+			} catch (IllegalArgumentException iae) {
+				throw iae;
+			}
 		}
 		
 		if (id >= 0 && this.entityIdMapping.get()) {
@@ -107,6 +111,10 @@ public class MCInputStream extends FilterInputStream {
 		packet = null;
 		
 		return r;
+	}
+	
+	public void close() throws IOException {
+		throw new IllegalStateException("Use MCSocket.close() to close streams");
 	}
 	
 	public void printRecentPacketIds() {

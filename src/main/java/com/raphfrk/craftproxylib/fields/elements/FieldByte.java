@@ -15,6 +15,11 @@ public class FieldByte extends FieldFixedLength {
 		this.unsigned = unsigned;
 	}
 	
+	@Override
+	public FieldByte newInstance() {
+		return new FieldByte(unsigned);
+	}
+	
 	public int readByte(InputStream in) throws IOException {
 		int r = in.read();
 

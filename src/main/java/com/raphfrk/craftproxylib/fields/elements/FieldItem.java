@@ -68,8 +68,13 @@ public class FieldItem extends Field {
 		
 		enchanted = new boolean[0x10000];
 		for (int i = 0; i < enchanted.length; i++) {
-			enchanted[i] = enchantedItemsIds.contains(i);
+			enchanted[i] = enchantedItemsIds.contains((short)i);
 		}
+	}
+	
+	@Override
+	public FieldItem newInstance() {
+		return new FieldItem();
 	}
 
 	@Override
@@ -86,6 +91,9 @@ public class FieldItem extends Field {
 			
 			if (enchanted[id]) {
 				int length = FieldShort.readShort(in);
+				if (length < 0) {
+					length = 0;
+				}
 				in.skip(length);
 				return length + 7;
 			} else {
