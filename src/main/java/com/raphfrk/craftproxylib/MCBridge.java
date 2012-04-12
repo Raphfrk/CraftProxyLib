@@ -1,5 +1,6 @@
 package com.raphfrk.craftproxylib;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,8 +19,6 @@ public class MCBridge {
 	private final PacketHandler[] upstream;
 	private final PacketHandler[] downstream;
 	
-	private static final PacketHandlerRegistry nullRegistry = new PacketHandlerRegistry();
-	
 	public MCBridge(Socket server, Socket client) throws IOException {
 		this(new MCSocket(server, true), new MCSocket(client, false));
 	}
@@ -29,7 +28,7 @@ public class MCBridge {
 	}
 	
 	public MCBridge(MCSocket server, MCSocket client) {
-		this(server, client, nullRegistry);
+		this(server, client, PacketHandlerRegistry.nullRegistry);
 	}
 	
 	public MCBridge(MCSocket server, MCSocket client, PacketHandlerRegistry registry) {
@@ -43,8 +42,8 @@ public class MCBridge {
 	public MCBridge(MCSocket server, MCSocket client,  PacketHandler[] upstream, PacketHandler[] downstream) {
 		AtomicBoolean closeSync = new AtomicBoolean(false);
 		
-		this.upstream = upstream;
-		this.downstream = downstream;
+		this.upstream = createNewInstances(upstream);
+		this.downstream = createNewInstances(downstream);
 		
 		this.serverToClientThread = new MCPassthroughThread(server, client, closeSync, downstream);
 		this.clientToServerThread = new MCPassthroughThread(client, server, closeSync, upstream);
@@ -102,7 +101,7 @@ public class MCBridge {
 	 * @return the handlers
 	 */
 	public PacketHandler[] getUpstreamHandlers() {
-		return this.upstream;
+		return upstream;
 	}
 	
 	/**
@@ -111,7 +110,19 @@ public class MCBridge {
 	 * @return the handlers
 	 */
 	public PacketHandler[] getDownstreamHandlers() {
-		return this.downstream;
+		return downstream;
+	}
+	
+	private PacketHandler[] createNewInstances(PacketHandler[] handlers) {
+		PacketHandler[] newHandlers = new PacketHandler[256];
+		if (handlers != null) {
+			for (int i = 0; i < 256; i++) {
+				if (handlers[i] != null) {
+					newHandlers[i] = handlers[i].newInstance();
+				}
+			}
+		}
+		return newHandlers;
 	}
 
 	private static class MCPassthroughThread extends Thread {
@@ -170,6 +181,10 @@ public class MCBridge {
 				while (running) {
 					try {
 						p = from.readPacket(p);
+					} catch (EOFException eof) {
+						running = false;
+						readError = true;
+						continue;
 					} catch (IOException ioe) {
 						running = false;
 						readError = true;

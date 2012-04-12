@@ -4,6 +4,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PacketHandlerRegistry {
 	
+	public static final PacketHandlerRegistry nullRegistry = new PacketHandlerRegistry();
+	
 	private final AtomicReference<PacketHandler>[] upstreamHandlers;
 	private final AtomicReference<PacketHandler>[] downstreamHandlers;
 

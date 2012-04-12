@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.raphfrk.craftproxylib.fields.elements.FieldInteger;
 import com.raphfrk.craftproxylib.packet.Packet;
-import com.raphfrk.craftproxylib.packet.standard.KickPacket;
 
 /**
  * Represents a class that can send Packets from to an OutputStream.<br>
@@ -20,6 +19,8 @@ public class MCOutputStream extends FilterOutputStream {
 	private final AtomicReference<byte[]> clientEntityId = new AtomicReference<byte[]>(null);
 	private final AtomicReference<byte[]> serverEntityId = new AtomicReference<byte[]>(null);
 	private final AtomicBoolean entityIdMapping = new AtomicBoolean();
+	
+	private int dataSent = 0;
 
 	public MCOutputStream(OutputStream out) {
 		super(out);
@@ -42,6 +43,8 @@ public class MCOutputStream extends FilterOutputStream {
 		if (id >= 0 && this.entityIdMapping.get()) {
 			packet.swapEntityId(clientEntityId.get(), serverEntityId.get());
 		}
+		
+		this.dataSent += packet.getLength();
 		
 		out.write(buf, off, length - off);
 	}
@@ -78,5 +81,9 @@ public class MCOutputStream extends FilterOutputStream {
 		FieldInteger.writeInt(newEntityId, 0, entityId);
 		this.clientEntityId.set(newEntityId);
 		this.entityIdMapping.set(true);
+	}
+	
+	public int getDataSent() {
+		return this.dataSent;
 	}
 }

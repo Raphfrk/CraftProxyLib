@@ -6,11 +6,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
+import com.raphfrk.craftproxylib.CraftProxyLib;
 import com.raphfrk.craftproxylib.MCBridge;
 import com.raphfrk.craftproxylib.MCServerListener;
-import com.raphfrk.craftproxylib.MCSocket;
 import com.raphfrk.craftproxylib.login.LoginInfo;
 import com.raphfrk.craftproxylib.login.MCLoginUtils;
 import com.raphfrk.craftproxylib.packet.standard.KickPacket;
@@ -21,7 +20,6 @@ public class BasicConnectionHandler extends ConnectionHandler {
 	private final int defaultPort;
 	private final boolean authenticate;
 	private final Map<String, InetSocketAddress> connectMap;
-	private final AtomicReference<MCBridge> bridgeRef = new AtomicReference<MCBridge>();
 	
 	public BasicConnectionHandler() {
 		super();
@@ -50,39 +48,28 @@ public class BasicConnectionHandler extends ConnectionHandler {
 
 	@Override
 	public void handleConnection() throws IOException {
-		setName(client.getRemoteSocketAddress().toString());
-
-		log("Connected");
 		
-		LoginInfo info = null;
+		LoginInfo info = this.handleLogin();
 		
-		try {
-			info = MCLoginUtils.handleLogin(client, connectMap, new InetSocketAddress(defaultAddress, defaultPort), false);
-		} catch (EOFException e) {
+		if (info == null) {
 			return;
 		}
 		
-		if (info.getError() != null) {
-			log(info.getError());
-			return;
-		} else if (info.isServerPing()) {
-			MCSocket mClient = info.getClientSocket();
-			if (mClient != null) {
-				mClient.close(KickPacket.generatePing("Proxy name", 1, 50));
-			}
-			return;
-		}
+		MCBridge bridge = bridgeConnections(info);
 		
-		setName(client.getRemoteSocketAddress() + "(" + info.getUsername() + ")");
-		
-		log("Logged in successfully");
-		
-		MCSocket mClient = info.getClientSocket();
-		MCSocket mServer = info.getServerSocket();
-		
-		MCBridge bridge = new MCBridge(mServer, mClient);
-		
-		bridgeRef.compareAndSet(null, bridge);
+	}
+	
+	/**
+	 * Bridges the connection between the client and server given in the LoginInfo.<br>
+	 * <br>
+	 * The method will return when either stream is interrupted or when the current thread is interrupted.
+	 * 
+	 * @param info
+	 * @return
+	 * @throws IOException
+	 */
+	protected MCBridge bridgeConnections(LoginInfo info) throws IOException {
+		MCBridge bridge = new MCBridge(mServer, mClient, registry);
 		
 		bridge.start();
 
@@ -98,23 +85,49 @@ public class BasicConnectionHandler extends ConnectionHandler {
 		} catch (InterruptedException e) {
 		}
 		
-		mServer.printRecentPacketIds();
-		mClient.printRecentPacketIds();
-		
-		if (!mServer.isClosed()) {
-			mServer.close();
-		}
-		
-		if (!mClient.isClosed()) {
-			mClient.close();
-		}
-		
+		return bridge;
 	}
 	
-	private void log(String message) {
-		System.out.println(getName() + ": " + message);
-	}
+	/**
+	 * Logs in to a server based on the connectionMap setting
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	protected LoginInfo handleLogin() throws IOException {
+		setName("(" + client.getRemoteSocketAddress().toString() + ")");
 
+		log("Connected");
+		
+		LoginInfo info = null;
+		
+		try {
+			info = MCLoginUtils.handleLogin(client, connectMap, new InetSocketAddress(defaultAddress, defaultPort), false);
+		} catch (EOFException e) {
+			return null;
+		}
+		
+		if (info.getError() != null) {
+			log(info.getError());
+			return null;
+		} else if (info.isServerPing()) {
+			mClient = info.getClientSocket();
+			if (mClient != null) {
+				mClient.close(KickPacket.generatePing("Proxy name", 1, 50));
+			}
+			return null;
+		}
+		
+		mClient = info.getClientSocket();
+		mServer = info.getServerSocket();
+		
+		setName(info.getUsername() + " (" + client.getRemoteSocketAddress() + ")");
+		
+		log("Logged in successfully");
+		
+		return info;
+	}
+	
 	@Override
 	public BasicConnectionHandler newInstance(Socket client, PacketHandlerRegistry registry, MCServerListener listener, ConnectionConfig config) throws IOException {
 		return new BasicConnectionHandler(client, registry, listener);

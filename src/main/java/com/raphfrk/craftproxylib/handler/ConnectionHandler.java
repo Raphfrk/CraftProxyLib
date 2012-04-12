@@ -3,6 +3,7 @@ package com.raphfrk.craftproxylib.handler;
 import java.io.IOException;
 import java.net.Socket;
 
+import com.raphfrk.craftproxylib.CraftProxyLib;
 import com.raphfrk.craftproxylib.MCServerListener;
 import com.raphfrk.craftproxylib.MCSocket;
 
@@ -28,23 +29,27 @@ public abstract class ConnectionHandler extends Thread {
 	 */
 	protected final MCServerListener listener;
 	
-	private final PacketHandlerRegistry registry;
+	protected final PacketHandlerRegistry registry;
 	
 	protected ConnectionHandler() {
 		this.client = null;
-		this.registry = null;
+		this.registry = PacketHandlerRegistry.nullRegistry;
 		this.listener = null;
 	}
 	
 	public ConnectionHandler(Socket client, PacketHandlerRegistry registry, MCServerListener listener) throws IOException {
 		this.client = client;
-		this.registry = registry;
+		if (registry == null) { 
+			this.registry = PacketHandlerRegistry.nullRegistry;
+		} else {
+			this.registry = registry;
+		}
 		this.listener = listener;
 		setName(client.getInetAddress().toString());
 	}
 	
 	public final void run() {
-		if (client == null && registry == null && listener == null) {
+		if (client == null && listener == null) {
 			throw new IllegalStateException("Connection handler started with default constructor should not be run");
 		}
 		
@@ -83,11 +88,11 @@ public abstract class ConnectionHandler extends Thread {
 	 * Safely ends the connection.
 	 */
 	public void end() throws IOException {
-		if (mClient != null) {
-			mClient.close("Connection shut down");
+		if (mClient != null && !mClient.isClosed()) {
+			mClient.close("CPLib Connection shut down");
 		}
-		if (mServer != null) {
-			mServer.close("Connection shut down");
+		if (mServer != null && !mServer.isClosed()) {
+			mServer.close("CPLib Connection shut down");
 		}
 	}
 	
@@ -102,5 +107,9 @@ public abstract class ConnectionHandler extends Thread {
 	 * @throws IOException
 	 */
 	public abstract ConnectionHandler newInstance(Socket client, PacketHandlerRegistry registry, MCServerListener listener, ConnectionConfig config) throws IOException;
+	
+	protected void log(String message) {
+		CraftProxyLib.log(getName() + ": " + message);
+	}
 	
 }

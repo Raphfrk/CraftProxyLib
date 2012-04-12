@@ -4,7 +4,9 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
+import com.raphfrk.craftproxylib.CraftProxyLib;
 import com.raphfrk.craftproxylib.fields.elements.FieldBoolean;
 import com.raphfrk.craftproxylib.fields.elements.FieldByte;
 import com.raphfrk.craftproxylib.fields.elements.FieldByteSizedByteArray;
@@ -186,7 +188,7 @@ public abstract class Field {
 						if (pos != -1) {
 							entityIdInfo[i] = arrayAppend(entityIdInfo[i], pos);
 						} else {
-							System.out.println("Warning: Unable to generate entity id static map");
+							CraftProxyLib.getLogger().log(Level.SEVERE, "Unable to generate entity id static map");
 						}
 					}
 					int fieldLength = field.getFixedLength();

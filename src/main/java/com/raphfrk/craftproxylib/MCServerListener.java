@@ -1,14 +1,13 @@
 package com.raphfrk.craftproxylib;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 
 import com.raphfrk.craftproxylib.handler.ConnectionHandler;
 import com.raphfrk.craftproxylib.handler.PacketHandlerRegistry;
@@ -66,7 +65,7 @@ public class MCServerListener extends Thread {
 				}
 
 				if (!floodShield(clientSocket)) {
-					System.out.println("Flood shield activated");
+					CraftProxyLib.log("Flood shield activated");
 					continue;
 				}
 				
@@ -112,8 +111,8 @@ public class MCServerListener extends Thread {
 			itr = this.connections.keySet().iterator();
 			while (itr.hasNext()) {
 				ConnectionHandler handler = itr.next();
-				System.out.println("WARNING: Connection " + handler + " did not shut down correctly");
-				System.out.println("WARNING: Shutting down thread forcefully");
+				CraftProxyLib.getLogger().log(Level.SEVERE, "WARNING: Connection " + handler + " did not shut down correctly");
+				CraftProxyLib.getLogger().log(Level.SEVERE, "WARNING: Shutting down thread forcefully");
 				handler.stop();
 			}
 		}

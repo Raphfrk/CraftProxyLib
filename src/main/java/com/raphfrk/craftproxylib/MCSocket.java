@@ -8,7 +8,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 
-import com.raphfrk.craftproxylib.fields.Field;
 import com.raphfrk.craftproxylib.packet.Packet;
 import com.raphfrk.craftproxylib.packet.standard.KickPacket;
 
@@ -132,15 +131,6 @@ public class MCSocket {
 
 		p = in.readPacket(p);
 			
-		if (p.getId() == 0) {
-			if (!server) {
-				Integer i = (Integer)Field.read(p, 0);
-				System.out.println("Client sent ping: " + i);
-			} else {
-				Integer i = (Integer)Field.read(p, 0);
-				System.out.println("Server sent ping: " + i);
-			}
-		}
 		return p;
 	}
 	

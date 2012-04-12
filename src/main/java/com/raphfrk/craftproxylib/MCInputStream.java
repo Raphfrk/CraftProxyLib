@@ -34,6 +34,8 @@ public class MCInputStream extends FilterInputStream {
 	private final AtomicReference<byte[]> serverEntityId = new AtomicReference<byte[]>(null);
 	private final AtomicBoolean entityIdMapping = new AtomicBoolean();
 	
+	private int dataReceived = 0;
+	
 	protected MCInputStream(InputStream in) {
 		this(in, 500);
 	}
@@ -108,6 +110,8 @@ public class MCInputStream extends FilterInputStream {
 		
 		r.setDone();
 		
+		this.dataReceived += r.getLength();
+		
 		packet = null;
 		
 		return r;
@@ -119,7 +123,7 @@ public class MCInputStream extends FilterInputStream {
 	
 	public void printRecentPacketIds() {
 		int[] oldIds = packetIds.read();
-		System.out.println("Packet ids: " + Arrays.toString(oldIds));
+		CraftProxyLib.log("Packet ids: " + Arrays.toString(oldIds));
 	}
 	
 	public void setServerEntityId(int entityId) {
@@ -132,6 +136,10 @@ public class MCInputStream extends FilterInputStream {
 		byte[] newEntityId = new byte[4];
 		FieldInteger.writeInt(newEntityId, 0, entityId);
 		this.clientEntityId.set(newEntityId);
+	}
+	
+	public int getDataReceived() {
+		return this.dataReceived;
 	}
 
 }
