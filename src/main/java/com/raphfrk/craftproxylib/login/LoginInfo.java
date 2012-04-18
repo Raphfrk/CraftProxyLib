@@ -18,6 +18,7 @@ public class LoginInfo {
 	private final MCSocket server;
 	private final MCSocket client;
 	private final boolean isServerPing;
+	private final int protocolVersion;
 	
 	private final String error;
 	
@@ -37,6 +38,7 @@ public class LoginInfo {
 		this.server = null;
 		this.client = null;
 		this.isServerPing = false;
+		this.protocolVersion = 0;
 	}
 	
 	public LoginInfo(boolean serverPing, MCSocket client, MCSocket server) {
@@ -54,6 +56,7 @@ public class LoginInfo {
 		this.dimension = 0;
 		this.server = server;
 		this.client = client;
+		this.protocolVersion = 0;
 		this.isServerPing = serverPing;
 		if (!serverPing) {
 			throw new IllegalArgumentException("Server ping must be true for server pings");
@@ -152,6 +155,7 @@ public class LoginInfo {
 		this.server = server;
 		this.client = client;
 		this.isServerPing = false;
+		this.protocolVersion = protocolVersion;
 	}
 
 	
@@ -184,7 +188,7 @@ public class LoginInfo {
 	}
 	
 	public int getProtocolVersion() {
-		return entityId;
+		return protocolVersion;
 	}
 	
 	public byte getUnused() {
@@ -232,7 +236,8 @@ public class LoginInfo {
 					", unused=" + unused +
 					", maxPlayers=" + maxPlayers +
 					", difficulty=" + difficulty +
-					", hash=" + hash + "}";
+					", hash=" + hash + 
+					", protocol version=" + protocolVersion + "}";
 		}
 	}
 	

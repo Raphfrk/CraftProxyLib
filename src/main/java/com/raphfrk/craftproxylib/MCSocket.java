@@ -217,4 +217,22 @@ public class MCSocket {
 		return socket.getInetAddress();
 	}
 	
+	public static String parseHostname(String target) {
+		String[] split = target.split(":");
+		return split[0];
+	}
+	
+	public static int parsePort(String target) {
+		String[] split = target.split(":");
+		if (split.length < 2) {
+			return 25565;
+		} else {
+			try {
+				return Integer.parseInt(split[1]);
+			} catch (NumberFormatException nfe) {
+				return 25565;
+			}
+		}
+	}
+	
 }

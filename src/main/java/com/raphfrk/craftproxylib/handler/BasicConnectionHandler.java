@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Map;
 
-import com.raphfrk.craftproxylib.CraftProxyLib;
 import com.raphfrk.craftproxylib.MCBridge;
 import com.raphfrk.craftproxylib.MCServerListener;
 import com.raphfrk.craftproxylib.login.LoginInfo;
@@ -29,16 +28,16 @@ public class BasicConnectionHandler extends ConnectionHandler {
 		this.defaultPort = 0;
 	}
 	
-	public BasicConnectionHandler(Socket client, PacketHandlerRegistry registry, MCServerListener listener) throws IOException {
-		this(client, registry, listener, InetAddress.getLocalHost(), 25565);
+	public BasicConnectionHandler(Socket client, PacketHandlerRegistry registry, MCServerListener listener, boolean rotateIP) throws IOException {
+		this(client, registry, listener, InetAddress.getLocalHost(), 25565, rotateIP);
 	}
 	
-	public BasicConnectionHandler(Socket client, PacketHandlerRegistry registry, MCServerListener listener, InetAddress defaultAddress, int defaultPort) throws IOException {
-		this(client, registry, listener, defaultAddress, defaultPort, false, null);
+	public BasicConnectionHandler(Socket client, PacketHandlerRegistry registry, MCServerListener listener, InetAddress defaultAddress, int defaultPort, boolean rotateIP) throws IOException {
+		this(client, registry, listener, defaultAddress, defaultPort, false, null, rotateIP);
 	}
 	
-	public BasicConnectionHandler(Socket client, PacketHandlerRegistry registry, MCServerListener listener, InetAddress defaultAddress, int defaultPort, boolean authenticate, Map<String, InetSocketAddress> connectMap) throws IOException {
-		super(client, registry, listener);
+	public BasicConnectionHandler(Socket client, PacketHandlerRegistry registry, MCServerListener listener, InetAddress defaultAddress, int defaultPort, boolean authenticate, Map<String, InetSocketAddress> connectMap, boolean rotateIP) throws IOException {
+		super(client, registry, listener, rotateIP);
 		this.defaultPort = defaultPort;
 		this.defaultAddress = defaultAddress;
 		this.authenticate = authenticate;
@@ -69,7 +68,7 @@ public class BasicConnectionHandler extends ConnectionHandler {
 	 * @throws IOException
 	 */
 	protected MCBridge bridgeConnections(LoginInfo info) throws IOException {
-		MCBridge bridge = new MCBridge(mServer, mClient, registry);
+		MCBridge bridge = new MCBridge(mServer, mClient, registry, this);
 		
 		bridge.start();
 
@@ -130,7 +129,7 @@ public class BasicConnectionHandler extends ConnectionHandler {
 	
 	@Override
 	public BasicConnectionHandler newInstance(Socket client, PacketHandlerRegistry registry, MCServerListener listener, ConnectionConfig config) throws IOException {
-		return new BasicConnectionHandler(client, registry, listener);
+		return new BasicConnectionHandler(client, registry, listener, listener.getRotateIP());
 	}
 
 }

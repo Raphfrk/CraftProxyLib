@@ -2,12 +2,16 @@ package com.raphfrk.craftproxylib.handler;
 
 import java.io.IOException;
 
+import com.raphfrk.craftproxylib.CraftProxyLib;
+import com.raphfrk.craftproxylib.MCBridge;
 import com.raphfrk.craftproxylib.MCOutputStream;
 import com.raphfrk.craftproxylib.packet.Packet;
 
 public abstract class PacketHandler {
 	
 	public final static Packet INTERRUPT = new Packet();
+	
+	protected MCBridge bridge = null;
 
 	/**
 	 * Handles a Packet.<br>
@@ -26,6 +30,31 @@ public abstract class PacketHandler {
 		return packet;
 	}
 	
+	/**
+	 * Creates a new instance of the packet handler for the given bridge
+	 * 
+	 * @param bridge
+	 * @return
+	 */
+	public PacketHandler newInstance(MCBridge bridge) {
+		PacketHandler handler = newInstance();
+		handler.bridge = bridge;
+		return handler;
+	}
+	
+	/**
+	 * Creates a new instance of the packet handler
+	 * 
+	 * @return
+	 */
 	public abstract PacketHandler newInstance();
+	
+	protected void log(String message) {
+		if (bridge != null) {
+			bridge.log(message);
+		} else {
+			CraftProxyLib.log(message);
+		}
+	}
 	
 }

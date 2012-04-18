@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.raphfrk.craftproxylib.fields.elements.FieldByte;
 import com.raphfrk.craftproxylib.fields.elements.FieldInteger;
 import com.raphfrk.craftproxylib.fields.elements.FieldString;
+import com.raphfrk.craftproxylib.login.LoginInfo;
 import com.raphfrk.craftproxylib.packet.Packet;
 
 public class LoginPacket extends Packet {
@@ -13,6 +14,10 @@ public class LoginPacket extends Packet {
 	private FieldInteger fInt = new FieldInteger();
 	private FieldByte fByte = new FieldByte(false);
 
+	public LoginPacket(LoginInfo info) throws IOException {
+		this(info.getProtocolVersion(), info.getUsername());
+	}
+	
 	public LoginPacket(int protocolVersion, String username) throws IOException {
 		this(protocolVersion, username, "", 0, 0, (byte)0, (byte)0, (byte)0);
 	}

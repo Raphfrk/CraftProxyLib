@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.raphfrk.craftproxylib.fields.FieldFixedLength;
+import com.raphfrk.craftproxylib.packet.Packet;
 
 public class FieldShort extends FieldFixedLength {
 	

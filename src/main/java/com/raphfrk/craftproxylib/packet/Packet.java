@@ -221,7 +221,7 @@ public class Packet extends InputStream {
 		pos = 1;
 
 		if (id != -1) {
-			Field[] fields = Field.getCompressedFields(id);
+			Field[] fields = Field.getExpandedFields(id);
 			for (Field f : fields) {
 				sb.append(", ");
 				try {

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.raphfrk.craftproxylib.handler.ConnectionHandler;
 import com.raphfrk.craftproxylib.handler.PacketHandler;
 import com.raphfrk.craftproxylib.handler.PacketHandlerRegistry;
 import com.raphfrk.craftproxylib.packet.Packet;
@@ -18,6 +19,7 @@ public class MCBridge {
 	private final MCPassthroughThread clientToServerThread;
 	private final PacketHandler[] upstream;
 	private final PacketHandler[] downstream;
+	private final ConnectionHandler connectionHandler;
 	
 	public MCBridge(Socket server, Socket client) throws IOException {
 		this(new MCSocket(server, true), new MCSocket(client, false));
@@ -32,24 +34,34 @@ public class MCBridge {
 	}
 	
 	public MCBridge(MCSocket server, MCSocket client, PacketHandlerRegistry registry) {
-		this(server, client, registry.getUpstreamHandlers(), registry.getDownstreamHandlers());
+		this(server, client, registry, null);
+	}
+	
+	public MCBridge(MCSocket server, MCSocket client, PacketHandlerRegistry registry, ConnectionHandler connectionHandler) {
+		this(server, client, registry.getUpstreamHandlers(), registry.getDownstreamHandlers(), connectionHandler);
 	}
 	
 	public MCBridge(MCSocket server, MCSocket client, MCBridge bridge) {
-		this(server, client, bridge.getUpstreamHandlers(), bridge.getDownstreamHandlers());
+		this(server, client, bridge, null);
 	}
 	
-	public MCBridge(MCSocket server, MCSocket client,  PacketHandler[] upstream, PacketHandler[] downstream) {
+	public MCBridge(MCSocket server, MCSocket client, MCBridge bridge, ConnectionHandler connectionHandler) {
+		this(server, client, bridge.getUpstreamHandlers(), bridge.getDownstreamHandlers(), connectionHandler);
+	}
+	
+	public MCBridge(MCSocket server, MCSocket client,  PacketHandler[] upstream, PacketHandler[] downstream, ConnectionHandler connectionHandler) {
 		AtomicBoolean closeSync = new AtomicBoolean(false);
 		
 		this.upstream = createNewInstances(upstream);
 		this.downstream = createNewInstances(downstream);
 		
-		this.serverToClientThread = new MCPassthroughThread(server, client, closeSync, downstream);
-		this.clientToServerThread = new MCPassthroughThread(client, server, closeSync, upstream);
+		this.serverToClientThread = new MCPassthroughThread(server, client, closeSync, this.downstream);
+		this.clientToServerThread = new MCPassthroughThread(client, server, closeSync, this.upstream);
 		
 		this.serverToClientThread.setReturnThread(clientToServerThread);
 		this.clientToServerThread.setReturnThread(serverToClientThread);
+		
+		this.connectionHandler = connectionHandler;
 	}
 	
 	/**
@@ -113,12 +125,20 @@ public class MCBridge {
 		return downstream;
 	}
 	
+	public void log(String message) {
+		if (connectionHandler != null) {
+			connectionHandler.log(message);
+		} else {
+			CraftProxyLib.log(message);
+		}
+	}
+	
 	private PacketHandler[] createNewInstances(PacketHandler[] handlers) {
 		PacketHandler[] newHandlers = new PacketHandler[256];
 		if (handlers != null) {
 			for (int i = 0; i < 256; i++) {
 				if (handlers[i] != null) {
-					newHandlers[i] = handlers[i].newInstance();
+					newHandlers[i] = handlers[i].newInstance(this);
 				}
 			}
 		}

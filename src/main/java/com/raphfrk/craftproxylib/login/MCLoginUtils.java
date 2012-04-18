@@ -5,12 +5,14 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Map;
 
 import com.raphfrk.craftproxylib.MCSocket;
 import com.raphfrk.craftproxylib.packet.Packet;
 import com.raphfrk.craftproxylib.packet.standard.HandshakePacket;
 import com.raphfrk.craftproxylib.packet.standard.LoginPacket;
+import com.raphfrk.craftproxylib.packet.standard.RespawnPacket;
 import com.raphfrk.craftproxylib.util.NetworkUtils;
 
 public class MCLoginUtils {
@@ -62,12 +64,7 @@ public class MCLoginUtils {
 		InetAddress serverIP = serverAddr.getAddress();
 		int serverPort = serverAddr.getPort();
 		
-		if (rotateIP && NetworkUtils.isLocal(serverAddr.getAddress())) {
-			InetAddress connectFromAddress = NetworkUtils.getNextLocalIP();
-			server = new Socket(serverIP, serverPort, connectFromAddress, 0);
-		} else {
-			server = new Socket(serverIP, serverPort);
-		}
+		server = getServerSocket(serverIP, serverPort, rotateIP);
 		
 		MCSocket mServer = new MCSocket(server, true);
 		
@@ -91,6 +88,67 @@ public class MCLoginUtils {
 		
 		return info;
 		
+	}
+	
+	/**
+	 * Logs into a server using the given login info.  A respawn packet is sent to the client to simulate login.
+	 * 
+	 * @param mClient the client socket to send the respawn packet to
+	 * @param info the login info to use when logging in
+	 * @param target the server hostname and port to connect to
+	 * @param rotateIP
+	 * @return
+	 * @throws IOException
+	 */
+	public static LoginInfo handleLogin(MCSocket mClient, LoginInfo info, String target, boolean rotateIP) throws IOException {
+		String serverHostname = MCSocket.parseHostname(target);
+		int serverPort = MCSocket.parsePort(target);
+		return handleLogin(mClient, info, serverHostname, serverPort, rotateIP);
+	}
+	
+	/**
+	 * Logs into a server using the given login info.  A respawn packet is sent to the client to simulate login.
+	 * 
+	 * @param mClient the client socket to send the respawn packet to
+	 * @param info the login info to use when logging in
+	 * @param hostname the server hostname
+	 * @param port the server port
+	 * @param rotateIP
+	 * @return
+	 * @throws IOException
+	 */
+	public static LoginInfo handleLogin(MCSocket mClient, LoginInfo info, String hostname, int port, boolean rotateIP) throws IOException {
+		Socket server = getServerSocket(hostname, port, rotateIP);
+		
+		MCSocket mServer = new MCSocket(server, true);
+
+		MCLoginUtils.sendClientHandshake(mServer, info);
+
+		info = new LoginInfo(info, mServer, mClient);
+		
+		info = MCLoginUtils.acceptServerHandshake(mServer, null, info);
+
+		if (info.getError() != null) {
+			return info;
+		}
+		
+		LoginPacket login = new LoginPacket(info);
+		
+		mServer.writePacket(login);
+
+		info = MCLoginUtils.acceptServerLogin(mServer, null, info);
+
+		if (info.getError() != null) {
+			return info;
+		}
+
+		RespawnPacket respawn1 = new RespawnPacket(info, true);
+		RespawnPacket respawn2 = new RespawnPacket(info, false);
+		
+		mClient.writePacket(respawn1);
+		mClient.writePacket(respawn2);
+		
+		return info;
 	}
 
 	/**
@@ -337,7 +395,7 @@ public class MCLoginUtils {
 		
 		do {
 			p = server.readPacket(p);
-			if (server != null) {
+			if (client != null) {
 				client.writePacket(p);
 			}
 		} while (p.getId() == 0xFA);
@@ -397,6 +455,25 @@ public class MCLoginUtils {
 			throw e;
 		}
 		return new LoginInfo(message);
+	}
+	
+	private static Socket getServerSocket(String hostname, int port, boolean rotateIP) throws IOException {
+		InetAddress addr = InetAddress.getByName(hostname);
+		
+		return getServerSocket(addr, port, rotateIP);
+	}
+		
+	private static Socket getServerSocket(InetAddress addr, int port, boolean rotateIP) throws IOException {
+
+		Socket server;
+		
+		if (rotateIP && NetworkUtils.isLocal(addr)) {
+			InetAddress connectFromAddress = NetworkUtils.getNextLocalIP();
+			server = new Socket(addr, port, connectFromAddress, 0);
+		} else {
+			server = new Socket(addr, port);
+		}
+		return server;
 	}
 	
 }

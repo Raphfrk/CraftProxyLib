@@ -226,6 +226,10 @@ public abstract class Field {
 		return compressedFieldMap[id];
 	}
 	
+	public static Field[] getExpandedFields(int id) {
+		return expandedFieldMap[id];
+	}
+	
 	public static int[] getEntityIdInfo(int i) {
 		return entityIdInfo[i];
 	}

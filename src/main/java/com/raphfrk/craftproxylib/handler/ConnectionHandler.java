@@ -31,13 +31,16 @@ public abstract class ConnectionHandler extends Thread {
 	
 	protected final PacketHandlerRegistry registry;
 	
+	protected final boolean rotateIP;
+	
 	protected ConnectionHandler() {
 		this.client = null;
 		this.registry = PacketHandlerRegistry.nullRegistry;
 		this.listener = null;
+		this.rotateIP = false;
 	}
 	
-	public ConnectionHandler(Socket client, PacketHandlerRegistry registry, MCServerListener listener) throws IOException {
+	public ConnectionHandler(Socket client, PacketHandlerRegistry registry, MCServerListener listener, boolean rotateIP) throws IOException {
 		this.client = client;
 		if (registry == null) { 
 			this.registry = PacketHandlerRegistry.nullRegistry;
@@ -45,6 +48,7 @@ public abstract class ConnectionHandler extends Thread {
 			this.registry = registry;
 		}
 		this.listener = listener;
+		this.rotateIP = rotateIP;
 		setName(client.getInetAddress().toString());
 	}
 	
@@ -75,6 +79,12 @@ public abstract class ConnectionHandler extends Thread {
 			if (listener != null) {
 				listener.removeConnection(this);
 			}
+			int remaining = listener.getActiveConnections();
+			if (remaining == 1) {
+				log("Connection closed, " + listener.getActiveConnections() + " connection remains");
+			} else {
+				log("Connection closed, " + listener.getActiveConnections() + " connections remain");
+			}
 		}
 	}
 
@@ -88,6 +98,7 @@ public abstract class ConnectionHandler extends Thread {
 	 * Safely ends the connection.
 	 */
 	public void end() throws IOException {
+		
 		if (mClient != null && !mClient.isClosed()) {
 			mClient.close("CPLib Connection shut down");
 		}
@@ -108,7 +119,13 @@ public abstract class ConnectionHandler extends Thread {
 	 */
 	public abstract ConnectionHandler newInstance(Socket client, PacketHandlerRegistry registry, MCServerListener listener, ConnectionConfig config) throws IOException;
 	
-	protected void log(String message) {
+	
+	/**
+	 * Logs a given message with a prefix for the connection.
+	 * 
+	 * @param message
+	 */
+	public void log(String message) {
 		CraftProxyLib.log(getName() + ": " + message);
 	}
 	

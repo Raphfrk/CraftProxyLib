@@ -31,19 +31,21 @@ public class MCServerListener extends Thread {
 	private final InetAddress address;
 	private final int port;
 	private final long floodTimeout;
+	private final boolean rotateIP;
 	
 	private final AtomicInteger index = new AtomicInteger(1);
 	
-	public MCServerListener(int port, PacketHandlerRegistry registry, ConnectionHandler connectionHandler) throws IOException {
-		this(null, port, FLOOD_DEFAULT, registry, connectionHandler);
+	public MCServerListener(int port, PacketHandlerRegistry registry, ConnectionHandler connectionHandler, boolean rotateIP) throws IOException {
+		this(null, port, FLOOD_DEFAULT, registry, connectionHandler, rotateIP);
 	}
 	
-	public MCServerListener(InetAddress address, int port, long floodTimeout, PacketHandlerRegistry registry, ConnectionHandler connectionHandler) throws IOException {
+	public MCServerListener(InetAddress address, int port, long floodTimeout, PacketHandlerRegistry registry, ConnectionHandler connectionHandler, boolean rotateIP) throws IOException {
 		this.floodTimeout = floodTimeout;
 		this.registry = registry;
 		this.connectionHandler = connectionHandler;
 		this.address = address;
 		this.port = port;
+		this.rotateIP = rotateIP;
 		serverSocket = new ServerSocket(port);
 		this.setName("Server Listener Thread-" + index.getAndIncrement());
 	}
@@ -144,6 +146,10 @@ public class MCServerListener extends Thread {
 		connections.put(handler, Boolean.TRUE);
 	}
 	
+	public int getActiveConnections() {
+		return connections.size();
+	}
+	
 	private void safeCloseSocket(Socket s) {
 		if (s != null) {
 			try {
@@ -189,6 +195,10 @@ public class MCServerListener extends Thread {
 			}
 		}
 		return true;
+	}
+	
+	public boolean getRotateIP() {
+		return rotateIP;
 	}
 
 }
